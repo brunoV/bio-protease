@@ -1,4 +1,5 @@
 *.swp
+*.swo
 *.tmp
 *.bak
 ./blib/
