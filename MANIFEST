@@ -1,8 +1,9 @@
 Changes
 MANIFEST
 Makefile.PL
-README
+README.mkd
 lib/Bio/Protease.pm
 t/00-load.t
-t/pod-coverage.t
 t/pod.t
+t/basic.t
+t/specificities.t
