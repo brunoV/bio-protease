@@ -3,7 +3,7 @@ use Modern::Perl;
 use Moose;
 use MooseX::ClassAttribute;
 use Moose::Util::TypeConstraints;
-use YAML::XS;
+use Carp;
 
 my %specificity_of;
 
@@ -44,12 +44,6 @@ has _cuts => (
     lazy_build  => 1,
 );
 
-sub cut {
-    my ( $self, $substrate, $pos ) = @_;
-    $substrate = uc $substrate;
-
-}
-
 sub _build__cuts {
     my $self = shift;
     return sub {
@@ -67,6 +61,32 @@ sub _build__cuts {
         }
     }
 }
+
+sub cut {
+    my ( $self, $substrate, $pos ) = @_;
+
+    unless (defined $pos and $pos > 0 and $pos <= length $substrate) {
+        carp "Incorrect position.";
+        return;
+    }
+
+    say $pos;
+
+    $substrate = uc $substrate;
+    $substrate = 'XXXX'. $substrate;
+    $pos += 4;
+
+    my $pep = substr($substrate, $pos - 4, 8);
+
+    if ($self->_cuts->($pep)) {
+        my $product = substr($substrate, 0, $pos);
+        substr($substrate, 0, $pos) = '';
+        s/X//g for ($product, $substrate);
+        return ($product, $substrate);
+    }
+    else { return }
+}
+
 
 sub digest {
     my ( $self, $substrate ) = @_;

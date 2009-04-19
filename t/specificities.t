@@ -3,6 +3,7 @@ use Modern::Perl;
 use lib qw(../lib);
 use Test::More qw(no_plan);
 use Test::Exception;
+use Test::Warn;
 use YAML::Any;
 
 use ok 'Bio::Protease';
@@ -46,8 +47,20 @@ foreach my $specificity ( @{Bio::Protease->Specificities} ) {
     $results->{$specificity} =  [scalar @cleavage_sites, [@cleavage_sites] ];
 }
 
-
 is_deeply($results, $true_values);
+
+# -Test the cut
+my $seq = 'AARAGQTVRFSDAAA';
+my $protease = Bio::Protease->new(specificity => 'trypsin');
+
+warning_like { !$protease->cut($seq) } qr/Incorrect position/;
+
+ok !$protease->cut($seq, 1);
+
+is_deeply([ $protease->cut($seq, 3) ], [ 'AAR', 'AGQTVRFSDAAA' ]);
+is_deeply([ $protease->cut($seq, 9) ], [ 'AARAGQTVR', 'FSDAAA' ]);
+
+#is_deeply(\@digest_products, \@cut_products);
 
 __DATA__
 ---
