@@ -9,7 +9,7 @@ my %specificity_of;
 
 =head1 NAME
 
-Bio::Protease - The great new Bio::Protease!
+Bio::Protease - A class that describes a proteolytic enzyme.
 
 =head1 VERSION
 
@@ -71,7 +71,6 @@ sub _regex_to_coderef {
         }
     }
 }
-
 sub _pattern_to_specificity {
     my $pattern_obj = shift;
     my $regex = $pattern_obj->str;
@@ -148,23 +147,42 @@ our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
-
-Perhaps a little code snippet.
-
     use Bio::Protease;
+    my $protease = Bio::Protease->new(specificity => 'trypsin');
 
-    my $foo = Bio::Protease->new();
-    ...
+    my $protein = 'MRAERVIKP'; # Could also be a Bio::Seq object.
 
-=head1 EXPORT
+    # Perform a full digestion
+    my @products = $protease->digest($protein);
 
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
+    # products: ( 'MR', 'AER', 'VIKP' )
+
+    # Get all the siscile bonds.
+    my @sites = $protease->cleavage_sites($protein);
+
+    # sites: ( 2, 5 )
+
+    # Try to cut at a specific position.
+
+    @products = $protease->cut($protein, 2);
+
+    # products: ( 'MR', 'AERVIKP' )
+
+
+=head1 DESCRIPTION
+
+This module models the hydrolitic behaviour of a proteolytic enzyme.
+Its main purpose is to model or predict the outcome of hydrolitic
+cleavage of a peptidic substrate.
+
+The enzyme specificity is currently modeled for 32 enzymes/reagents.
+This models are somewhat simplistic as they are largely regex-based, and
+do not take into account subtleties such as kinetic/temperature effects,
+accessible solvent area or secondary or tertiary structure elements.
+However, the module is flexible enough to account for any of these
+effects via user-defined functions.
 
 =head1 FUNCTIONS
-
-=head2 function1
 
 =cut
 
