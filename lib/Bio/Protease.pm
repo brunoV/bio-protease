@@ -3,6 +3,9 @@ use Modern::Perl;
 use Moose;
 use MooseX::ClassAttribute;
 use Moose::Util::TypeConstraints;
+use YAML::XS;
+
+my %specificity_of;
 
 =head1 NAME
 
@@ -14,45 +17,6 @@ Version 0.01
 
 =cut
 
-my %specificity_of = (
-    'arg-c proteinase'           => \&_argc,
-    'asp-n endopeptidase'        => \&_aspn,
-    'asp-n endopeptidase glu'    => \&_aspn_glu,
-    'bnps skatole'               => \&_bnps,
-    'caspase 1'                  => \&_casp1,
-    'caspase 2'                  => \&_casp2,
-    'caspase 3'                  => \&_casp3,
-    'caspase 4'                  => \&_casp4,
-    'caspase 5'                  => \&_casp5,
-    'caspase 6'                  => \&_casp6,
-    'caspase 7'                  => \&_casp7,
-    'caspase 8'                  => \&_casp8,
-    'caspase 9'                  => \&_casp9,
-    'caspase 10'                 => \&_casp2,
-    'chymotrypsin'               => \&_chtryp_high,
-    'chymotrypsin low'           => \&_chtryp_low,
-    'clostripain'                => \&_clostripain,
-    'cnbr'                       => \&_cnbr,
-    'enterokinase'               => \&_enterokinase,
-    'factor xa'                  => \&_factor_xa,
-    'formic acid'                => \&_formic_acid,
-    'glutamyl endopeptidase'     => \&_glutamil_endopeptidase,
-    'granzymeb'                  => \&_granzyme_b,
-    'hydroxylamine'              => \&_hydroxylamine,
-    'iodosobenzoic acid'         => \&_iodobenzoic_acid,
-    'lysc'                       => \&_lys_c,
-    'lysn'                       => \&_lys_n,
-    'ntcb'                       => \&_ntcb,
-    'pepsin ph1.3'               => \&_pepsin_ph_1p3,
-    'pepsin'                     => \&_pepsin,
-    'proline endopeptidase'      => \&_proline_endopeptidase,
-    'proteinase k'               => \&_proteinase_k,
-    'staphylococcal peptidase i' => \&_staphilococcal_peptidase_i,
-    'thermolysin'                => \&_thermolysin,
-    'thrombin'                   => \&_thrombin,
-    'trypsin'                    => \&_trypsin,
-);
-
 class_has 'Specificities' => (
     is      => 'ro',
     isa     => 'ArrayRef',
@@ -63,8 +27,8 @@ subtype 'Specificity',
     as 'Str',
     where { $_ ~~ @{__PACKAGE__->Specificities()} },
     message {
-       "That's not a recognized specificity. Options are: ",
-       keys %specificity_of;
+       "That's not a recognized specificity.
+       Options are: @{[keys %specificity_of]}";
     };
 
 has specificity => (
@@ -78,27 +42,35 @@ has _cuts => (
     is          => 'ro',
     isa         => 'CodeRef',
     lazy_build  => 1,
-    build => sub { $specificity_of{(shift)->specificity} },
 );
 
+sub cut {
+    my ( $self, $substrate, $pos ) = @_;
+    $substrate = uc $substrate;
+
+}
+
 sub _build__cuts {
-     my $self = shift;
-
-     return sub {
+    my $self = shift;
+    return sub {
         my $substrate = shift;
-
-        unless ( length($substrate) == 8 ) {
-            my $tail_length = 8 - length($substrate);
-            $substrate = $substrate . 'X' x $tail_length;
+        unless ( length $substrate == 8 ) {
+            $substrate .= 'X' x (8 - length $substrate);
         }
 
-        my @res = split('', $substrate);
-        return $specificity_of{$self->specificity}->(@res);
+        my @regexes = @{$specificity_of{$self->specificity}};
+
+        if ( grep { $substrate !~ /$_/ } @regexes ) {
+            return;
+        } else {
+            return 1;
+        }
     }
 }
 
 sub digest {
     my ( $self, $substrate ) = @_;
+    $substrate = uc $substrate;
 
     my @products;
     my ($i, $j) = (0, 0);
@@ -115,11 +87,14 @@ sub digest {
     }
     push @products, substr($substrate, $j - length($substrate));
 
+    s/X//g for @products[0, -1];
+
     return @products;
 }
 
 sub cleavage_sites {
     my ( $self, $substrate ) = @_;
+    $substrate = uc $substrate;
     my @sites;
     my $i = 0;
 
@@ -213,443 +188,46 @@ under the same terms as Perl itself.
 
 ### Enzyme specificities
 
-sub _argc {
-    my @res = @_;
-    if ( uc $res[3] eq 'R' ) {
-        return 1;
-    } else {
-        return;
-    }
-}
-
-sub _aspn {
-    my @res = @_;
-    if ( uc $res[4] eq 'D' ) {
-        return 1;
-    } else {
-        return;
-    }
-}
-
-sub _aspn_glu {
-    my @res = @_;
-    if ( $res[4] =~ /[DE]/i ) {
-        return 1;
-    } else {
-        return;
-    }
-}
-
-sub _bnps {
-    my @res = @_;
-
-    if ( uc $res[3] eq 'W' ) {
-        return 1;
-    } else {
-        return;
-    }
-}
-
-sub _casp1 {
-    my @res = @_;
-
-    if (
-        $res[0] !~ /[FWYL]  /ix or
-        $res[2] !~ /[HAT]   /ix or
-        $res[3] !~ /D       /ix or
-        $res[4] =~ /[PEDQKR]/ix
-       )   { return   }
-    else { return 1 };
-}
-
-sub _casp2 {
-    my @res = @_;
-
-    if ( 
-        $res[0] !~ /D       /ix or
-        $res[1] !~ /V       /ix or
-        $res[2] !~ /A       /ix or
-        $res[3] !~ /D       /ix or
-        $res[4] =~ /[PEDQKR]/ix
-       )   { return   }
-    else { return 1 };
-}
-
-sub _casp3 {
-    my @res = @_;
-
-    if ( 
-        $res[0] !~ /D       /ix or
-        $res[1] !~ /M       /ix or
-        $res[2] !~ /Q       /ix or
-        $res[3] !~ /D       /ix or
-        $res[4] =~ /[PEDQKR]/ix
-       )   { return   }
-    else { return 1 };
-}
-
-sub _casp4 {
-    my @res = @_;
-
-    if ( 
-        $res[0] !~ /L       /ix or
-        $res[1] !~ /E       /ix or
-        $res[2] !~ /V       /ix or
-        $res[3] !~ /D       /ix or
-        $res[4] =~ /[PEDQKR]/ix
-       )   { return   }
-    else { return 1 };
-}
-
-sub _casp5 {
-    my @res = @_;
-
-    if (
-        $res[0] !~ /[LW]    /ix or
-        $res[1] !~ /E       /ix or
-        $res[2] !~ /H       /ix or
-        $res[3] !~ /D       /ix
-       )   { return   }
-    else { return 1 }
-}
-
-sub _casp6 {
-    my @res = @_;
-
-    if ( 
-        $res[0] !~ /V       /ix or
-        $res[1] !~ /E       /ix or
-        $res[2] !~ /[HI]    /ix or
-        $res[3] !~ /D       /ix or
-        $res[4] =~ /[PEDQKR]/ix
-       )   { return   }
-    else { return 1 };
-}
-
-sub _casp7 {
-    my @res = @_;
-
-    if (
-        $res[0] !~ /D       /ix or
-        $res[1] !~ /E       /ix or
-        $res[2] !~ /V       /ix or
-        $res[3] !~ /D       /ix or
-        $res[4] =~ /[PEDQKR]/ix
-       )   { return   }
-    else { return 1 };
-}
-
-sub _casp8 {
-    my @res = @_;
-
-    if (
-        $res[0] !~ /[IL]    /ix or
-        $res[1] !~ /E       /ix or
-        $res[2] !~ /T       /ix or
-        $res[3] !~ /D       /ix or
-        $res[4] =~ /[PEDQKR]/ix
-       )   { return   }
-    else { return 1 };
-}
-
-sub _casp9 {
-    my @res = @_;
-
-    if (
-        $res[0] !~ /L       /ix or
-        $res[1] !~ /E       /ix or
-        $res[2] !~ /H       /ix or
-        $res[3] !~ /D       /ix
-       )   { return   }
-    else { return 1 };
-}
-
-sub _casp10 {
-    my @res = @_;
-
-    if (
-        $res[0] !~ /I       /ix or
-        $res[1] !~ /E       /ix or
-        $res[2] !~ /A       /ix or
-        $res[3] !~ /D       /ix
-       )   { return   }
-    else   { return 1 };
-}
-
-sub _chtryp_high {
-    my @res = @_;
-
-    if (
-        $res[3] =~ /[FY]/ix and
-        $res[4] !~ /P   /ix
-       )   { return 1 }
-    elsif (
-        $res[3] =~ /W   /ix and
-        $res[4] !~ /[MP]/ix
-    )      { return 1 }
-    else   { return   };
-}
-
-sub _chtryp_low {
-    my @res = @_;
-
-    if (
-        $res[3] =~ /[FLY]   /ix and
-        $res[4] !~ /P       /ix
-       )   { return 1 }
-    elsif (
-        $res[3] =~ /W       /ix and
-        $res[4] !~ /[MP]    /ix
-    )      { return 1 }
-    elsif (
-        $res[3] =~ /M       /ix and
-        $res[4] !~ /[PY]    /ix
-    )      { return 1 }
-    elsif (
-        $res[3] =~ /H       /ix and
-        $res[4] !~ /[DMPW]  /ix
-    )      { return 1 }
-    else   { return   };
-}
-
-sub _clostripain {
-    my @res = @_;
-
-    if ($res[3] =~ /R/i)   { return 1 }
-    else                   { return   };
-}
-
-sub _cnbr {
-    my @res = @_;
-
-    if ($res[3] =~ /M/i)   { return 1 }
-    else                   { return   };
-}
-
-sub _enterokinase {
-    my @res = @_;
-
-    if (
-        $res[0] =~ /[DN]   /ix and
-        $res[1] =~ /[DN]   /ix and
-        $res[2] =~ /[DN]   /ix and
-        $res[3] =~ /K      /ix
-    )      { return 1 }
-    else   { return   };
-}
-
-sub _factor_xa {
-    my @res = @_;
-
-    if (
-        $res[3] =~ /R          /ix and
-        $res[2] =~ /G          /ix and
-        $res[1] =~ /[DE]       /ix and
-        $res[0] =~ /[AFGILTVM] /ix
-    )      { return 1 }
-    else   { return   };
-}
-
-sub _formic_acid { # wtf?
-    my @res = @_;
-
-    if ($res[3] =~ /D/ix) { return 1 }
-    else                  { return   };
-}
-
-sub _glutamil_endopeptidase {
-    my @res = @_;
-
-    if ($res[3] =~ /E/ix) { return 1 }
-    else                  { return   };
-}
-
-sub _granzyme_b {
-    my @res = @_;
-
-    if (
-        $res[0] =~ /I /ix and
-        $res[1] =~ /E /ix and
-        $res[2] =~ /P /ix and
-        $res[3] =~ /D /ix
-    )      { return 1 }
-    else   { return   };
-}
-
-sub _hydroxylamine {
-    my @res = @_;
-
-    if (
-        $res[3] =~ /N /ix and
-        $res[4] =~ /G /ix
-    )      { return 1 }
-    else   { return   };
-}
-
-sub _iodobenzoic_acid {
-    my @res = @_;
-
-    if ($res[3] =~ /W/ix) { return 1 }
-    else                  { return   };
-}
-
-sub _lys_c {
-    my @res = @_;
-
-    if ($res[3] =~ /K/ix) { return 1 }
-    else                  { return   };
-}
-
-sub _lys_n {
-    my @res = @_;
-
-    if ($res[4] =~ /K/ix) { return 1 }
-    else                  { return   };
-}
-
-sub _ntcb {
-    my @res = @_;
-
-    if ($res[4] =~ /C/ix) { return 1 }
-    else                  { return   };
-}
-
-sub _pepsin_ph_1p3 {
-    my @res = @_;
-
-    if (
-        $res[1] !~ /[HKR] /ix and
-        $res[2] !~ /P     /ix and
-        $res[3] !~ /R     /ix and
-        $res[4] =~ /[FLWY]/ix and
-        $res[5] !~ /P     /ix
-       )   { return 1 }
-    elsif (
-        $res[1] !~ /[HKR] /ix and
-        $res[2] !~ /P     /ix and
-        $res[3] =~ /[FLWY]/ix and
-        $res[5] !~ /P     /ix
-    )      { return 1 }
-    else   { return   };
-}
-
-sub _pepsin { # pH more than 2
-    my @res = @_;
-
-    if (
-        $res[1] !~ /[HKR] /ix and
-        $res[2] !~ /P     /ix and
-        $res[3] !~ /R     /ix and
-        $res[4] =~ /[FL]  /ix and
-        $res[5] !~ /P     /ix
-       )   { return 1 }
-    elsif (
-        $res[1] !~ /[HKR] /ix and
-        $res[2] !~ /P     /ix and
-        $res[3] =~ /[FL]  /ix and
-        $res[5] !~ /P     /ix
-    )      { return 1 }
-    else   { return   };
-}
-
-sub _proline_endopeptidase {
-    my @res = @_;
-
-    if (
-        $res[2] =~ /[HKR]/ix and
-        $res[3] =~ /P    /ix and
-        $res[4] !~ /P    /ix
-    )      { return 1 }
-    else   { return   };
-}
-
-sub _proteinase_k {
-    my @res = @_;
-
-    if ($res[3] =~ /[AFILTVWY]/ix) { return 1 }
-    else                            { return   };
-}
-
-sub _staphilococcal_peptidase_i {
-    my @res = @_;
-
-    if (
-        $res[3] =~ /E/i and
-        $res[2] !~ /E/i
-    )      { return 1 }
-    else   { return   };
-}
-
-sub _thermolysin {
-    my @res = @_;
-
-    if (
-        $res[4] =~ /[AFILMV]/ix and
-        $res[3] =~ /[^DEX]  /ix and
-        $res[5] !~ /P       /ix
-
-    )      { return 1 }
-    else   { return   };
-}
-
-sub _thrombin {
-    my @res = @_;
-
-    if (
-        $res[2] =~ /G          /ix and
-        $res[3] =~ /R          /ix and
-        $res[4] =~ /G          /ix
-       )   { return 1 }
-    elsif       (
-        $res[2] =~ /P          /ix and
-        $res[3] =~ /R          /ix and
-        $res[0] =~ /[AFGILTVM] /ix and
-        $res[1] =~ /[AFGILTVWA]/ix and
-        $res[4] !~ /[DE]       /ix and
-        $res[5] !~ /[DE]       /ix
-    )      { return 1 }
-    else   { return   };
-}
-
-sub _trypsin {
-
-    my @res = @_;
-
-    if (
-        $res[2] =~ /[CD] /ix and
-        $res[3] =~ /K    /ix and
-        $res[4] =~ /D    /ix
-       )   { return }
-    elsif       (
-        $res[2] =~ /C    /ix and
-        $res[3] =~ /K    /ix and
-        $res[4] =~ /[HY] /ix
-    )      { return }
-    elsif       (
-        $res[2] =~ /C    /ix and
-        $res[3] =~ /R    /ix and
-        $res[4] =~ /K    /ix
-    )      { return }
-    elsif       (
-        $res[2] =~ /R    /ix and
-        $res[3] =~ /R    /ix and
-        $res[4] =~ /[HR] /ix
-    )      { return }
-    elsif       (
-        $res[3] =~ /[KR] /ix and
-        $res[4] !~ /P    /ix
-    )      { return 1 }
-    elsif       (
-        $res[2] =~ /W    /ix and
-        $res[3] =~ /K    /ix and
-        $res[4] =~ /P    /ix
-    )      { return 1 }
-    elsif       (
-        $res[2] =~ /M   /ix and
-        $res[3] =~ /R   /ix and
-        $res[4] =~ /P   /ix
-    )      { return 1 }
-    else   { return   };
+BEGIN {
+    %specificity_of = (
+        'arg-c proteinase'           => [ '.{3}R.{4}' ],
+        'asp-n endopeptidase'        => [ '.{4}D.{3}' ],
+        'asp-n endopeptidase glu'    => [ '.{4}[DE].{3}' ],
+        'bnps skatole'               => [ '.{3}W.{4}' ],
+        'caspase 1'                  => [ '[FWYL].[HAT]D[^PEDQKR].{3}' ],
+        'caspase 2'                  => [ 'DVAD[^PEDQKR].{3}' ],
+        'caspase 3'                  => [ 'DMQD[^PEDQKR].{3}' ],
+        'caspase 4'                  => [ 'LEVD[^PEDQKR].{3}' ],
+        'caspase 5'                  => [ '[LW]EHD.{4}' ],
+        'caspase 6'                  => [ 'VE[HI]D[^PEDQKR].{3}' ],
+        'caspase 7'                  => [ 'DEVD[^PEDQKR].{3}' ],
+        'caspase 8'                  => [ '[IL]ETD[^PEDQKR].{3}' ],
+        'caspase 9'                  => [ 'LEHD.{4}' ],
+        'caspase 10'                 => [ 'IEAD.{4}' ],
+        'chymotrypsin'               => [ '.{3}[FY][^P].{3}|.{3}W[^MP].{3}' ],
+        'chymotrypsin low'           => [ '.{3}[FLY][^P].{3}|.{3}W[^MP].{3}|.{3}M[^PY].{3}|.{3}H[^DMPW].{3}' ],
+        'clostripain'                => [ '.{3}R.{4}' ],
+        'cnbr'                       => [ '.{3}M.{4}' ],
+        'enterokinase'               => [ '[DN][DN][DN]K.{4}' ],
+        'factor xa'                  => [ '[AFGILTVM][DE]GR.{4}' ],
+        'formic acid'                => [ '.{3}D.{4}' ],
+        'glutamyl endopeptidase'     => [ '.{3}E.{4}' ],
+        'granzymeb'                  => [ 'IEPD.{4}' ],
+        'hydroxylamine'              => [ '.{3}NG.{3}' ],
+        'iodosobenzoic acid'         => [ '.{3}W.{4}' ],
+        'lysc'                       => [ '.{3}K.{4}' ],
+        'lysn'                       => [ '.{4}K.{3}' ],
+        'ntcb'                       => [ '.{4}C.{3}' ],
+        'pepsin ph1.3'               => [ '.[^HKR][^P][^R][FLWY][^P].{2}|.[^HKR][^P][FLWY].[^P].{2}' ],
+        'pepsin'                     => [ '.[^HKR][^P][^R][FL][^P].{2}|.[^HKR][^P][FL].[^P].{2}' ],
+        'proline endopeptidase'      => [ '.{2}[HKR]P[^P].{3}' ],
+        'proteinase k'               => [ '.{3}[AFILTVWY].{4}' ],
+        'staphylococcal peptidase i' => [ '.{2}[^E]E.{4}' ],
+        'thermolysin'                => [ '.{3}[^XDE][AFILMV][^P].{2}' ],
+        'thrombin'                   => [ '.{2}GRG.{3}|[AFGILTVM][AFGILTVWA]PR[^DE][^DE].{2}' ],
+        'trypsin'                    => [ '.{2}(?!CKD).{6}', '.{2}(?!DKD).{6}', '.{2}(?!CKH).{6}', '.{2}(?!CKY).{6}', '.{2}(?!RRH).{6}', '.{2}(?!RRR).{6}', '.{2}(?!CRK).{6}',
+                                        '.{3}[KR][^P].{3}|.{2}WKP.{3}|.{2}MRP.{3}' ]
+    );
 }
 
 no Moose;
