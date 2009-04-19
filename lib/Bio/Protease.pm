@@ -36,7 +36,7 @@ has _specif_code => (
 );
 
 coerce 'Specificity',
-    from 'Str', via { &_str_to_specificity($_) },
+    from 'Str', via { _str_to_specificity($_) },
     from 'SeqPattern', via { _pattern_to_specificity($_) };
 
 sub _cuts {
@@ -53,6 +53,15 @@ sub _str_to_specificity {
     my @regexes = @{$specificity_of{$specificity}};
 
     my $coderef = _regex_to_coderef(@regexes);
+    return $coderef;
+}
+
+sub _pattern_to_specificity {
+    my $pattern_obj = shift;
+    my $regex = $pattern_obj->str;
+
+    my $coderef = _regex_to_coderef($regex);
+    return $coderef;
 }
 
 sub _regex_to_coderef {
@@ -72,24 +81,13 @@ sub _regex_to_coderef {
     }
 }
 
-sub _pattern_to_specificity {
-    my $pattern_obj = shift;
-    my $regex = $pattern_obj->str;
-
-    my $coderef = _regex_to_coderef($regex);
-    return $coderef;
-
-}
-
 sub cut {
     my ( $self, $substrate, $pos ) = @_;
 
-    unless (defined $pos and $pos > 0 and $pos <= length $substrate) {
+    unless ( defined $pos and $pos > 0 and $pos <= length $substrate ) {
         carp "Incorrect position.";
         return;
     }
-
-    say $pos;
 
     $substrate = uc $substrate;
     $substrate = 'XXXX'. $substrate;
@@ -97,10 +95,12 @@ sub cut {
 
     my $pep = substr($substrate, $pos - 4, 8);
 
-    if ($self->_cuts($pep)) {
+    if ( $self->_cuts($pep) ) {
         my $product = substr($substrate, 0, $pos);
         substr($substrate, 0, $pos) = '';
+
         s/X//g for ($product, $substrate);
+
         return ($product, $substrate);
     }
     else { return }
@@ -118,7 +118,7 @@ sub digest {
         if ( $self->_cuts( $pep ) ) {
             my $product = substr($substrate, $j, $i + 4 - $j);
             push @products, $product;
-            #    substr($substrate, 0, $i + 4) = '';
+
             $j = $i + 4;
         }
         $i++;
