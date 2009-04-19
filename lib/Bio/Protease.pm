@@ -1,5 +1,5 @@
 package Bio::Protease;
-use Modern::Perl;
+use 5.010_000;
 use Moose;
 use MooseX::ClassAttribute;
 use Moose::Util::TypeConstraints;
@@ -289,9 +289,9 @@ As a rule, all specificity names are lower case. Currently, they include:
 
 =item * arg-cproteinase
 
-=item * asp-nendopeptidase
+=item * asp-n endopeptidase
 
-=item * asp-nendopeptidase glu
+=item * asp-n endopeptidase glu
 
 =item * bnps skatole
 
