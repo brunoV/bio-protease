@@ -12,7 +12,14 @@ lives_ok { $enzyme = Bio::Protease->new(specificity => 'trypsin') };
 
 isa_ok($enzyme, 'Bio::Protease');
 
-#is($enzyme->specificity, 'trypsin');
-
 dies_ok { $enzyme = Bio::Protease->new() };
 dies_ok { $enzyme = Bio::Protease->new(specificity => 'ooo') };
+
+lives_ok { $enzyme = Bio::Protease->new(specificity => sub { return 1 }) };
+
+use Bio::Tools::SeqPattern;
+my $pattern = Bio::Tools::SeqPattern->new(
+    -SEQ => 'AGGAL[^P]', -TYPE => 'Amino'
+);
+
+lives_ok { $enzyme = Bio::Protease->new(specificity => $pattern) };
