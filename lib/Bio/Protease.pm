@@ -23,36 +23,46 @@ class_has 'Specificities' => (
     default => sub { [ keys %specificity_of ] },
 );
 
-subtype 'Specificity',
-    as 'Str',
-    where { $_ ~~ @{__PACKAGE__->Specificities()} },
-    message {
-       "That's not a recognized specificity.
-       Options are: @{[keys %specificity_of]}";
-    };
+subtype 'Specificity' => as 'CodeRef';
+subtype 'SeqPattern'
+    => as class_type('Bio::Tools::SeqPattern');
 
-has specificity => (
+has _specif_code => (
    is         => 'ro',
    isa        => 'Specificity',
+   init_arg   => 'specificity',
    required   => 1,
    coerce     => 1,
 );
 
-has _cuts => (
-    is          => 'ro',
-    isa         => 'CodeRef',
-    lazy_build  => 1,
-);
+coerce 'Specificity',
+    from 'Str', via { &_str_to_specificity($_) },
+    from 'SeqPattern', via { _pattern_to_specificity($_) };
 
-sub _build__cuts {
+sub _cuts {
     my $self = shift;
+    return $self->_specif_code->(@_);
+}
+
+sub _str_to_specificity {
+    my $specificity = shift;
+
+    croak "Not a known specificity\n"
+        unless $specificity ~~ @{__PACKAGE__->Specificities};
+
+    my @regexes = @{$specificity_of{$specificity}};
+
+    my $coderef = _regex_to_coderef(@regexes);
+}
+
+sub _regex_to_coderef {
+    my @regexes = @_;
+
     return sub {
         my $substrate = shift;
         unless ( length $substrate == 8 ) {
             $substrate .= 'X' x (8 - length $substrate);
         }
-
-        my @regexes = @{$specificity_of{$self->specificity}};
 
         if ( grep { $substrate !~ /$_/ } @regexes ) {
             return;
@@ -60,6 +70,15 @@ sub _build__cuts {
             return 1;
         }
     }
+}
+
+sub _pattern_to_specificity {
+    my $pattern_obj = shift;
+    my $regex = $pattern_obj->str;
+
+    my $coderef = _regex_to_coderef($regex);
+    return $coderef;
+
 }
 
 sub cut {
@@ -78,7 +97,7 @@ sub cut {
 
     my $pep = substr($substrate, $pos - 4, 8);
 
-    if ($self->_cuts->($pep)) {
+    if ($self->_cuts($pep)) {
         my $product = substr($substrate, 0, $pos);
         substr($substrate, 0, $pos) = '';
         s/X//g for ($product, $substrate);
@@ -86,7 +105,6 @@ sub cut {
     }
     else { return }
 }
-
 
 sub digest {
     my ( $self, $substrate ) = @_;
@@ -97,7 +115,7 @@ sub digest {
 
     $substrate = 'XXXX' . $substrate;
     while ( my $pep = substr($substrate, $i, 8) ) {
-        if ( $self->_cuts->( $pep ) ) {
+        if ( $self->_cuts( $pep ) ) {
             my $product = substr($substrate, $j, $i + 4 - $j);
             push @products, $product;
             #    substr($substrate, 0, $i + 4) = '';
@@ -120,7 +138,7 @@ sub cleavage_sites {
 
     $substrate = 'XXXX' . $substrate;
     while ( my $pep = substr($substrate, $i, 8 ) ) {
-        if ( $self->_cuts->( $pep ) ) { push @sites, $i };
+        if ( $self->_cuts( $pep ) ) { push @sites, $i };
         ++$i;
     }
     return @sites;
