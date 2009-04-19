@@ -71,6 +71,7 @@ sub _regex_to_coderef {
         }
     }
 }
+
 sub _pattern_to_specificity {
     my $pattern_obj = shift;
     my $regex = $pattern_obj->str;
@@ -168,23 +169,212 @@ our $VERSION = '0.01';
 
     # products: ( 'MR', 'AERVIKP' )
 
+=cut
 
 =head1 DESCRIPTION
 
 This module models the hydrolitic behaviour of a proteolytic enzyme.
-Its main purpose is to model or predict the outcome of hydrolitic
-cleavage of a peptidic substrate.
+Its main purpose is to predict the outcome of hydrolitic cleavage of a
+peptidic substrate.
 
 The enzyme specificity is currently modeled for 32 enzymes/reagents.
 This models are somewhat simplistic as they are largely regex-based, and
 do not take into account subtleties such as kinetic/temperature effects,
-accessible solvent area or secondary or tertiary structure elements.
-However, the module is flexible enough to account for any of these
-effects via user-defined functions.
-
-=head1 FUNCTIONS
+accessible solvent area, secondary or tertiary structure elements.
+However, the module is flexible enough to allow the inclusion of any of
+these effects via user-defined specificity functions.
 
 =cut
+
+=head1 Attributes And Methods
+
+=head2 specificity
+
+Set the enzyme's specificity. Required. Could be either of:
+
+=over 4
+
+=item * an enzyme name: e.g. 'enterokinase'
+
+    my $enzyme = Bio::Protease->new(specificity => 'enterokinase');
+
+There are currently definitions for 36 enzymes/reagents. See C<Specificities>.
+
+=item * a Bio::Tools::SeqPattern object.
+
+    my $motif = Bio::Tools::SeqPattern->new(
+        -SEQ  => 'MN[ED]K[^P].{3}',
+        -TYPE => 'Amino',
+    );
+
+    my $enzyme = Bio::Protease->new(specificity => $motif);
+
+The motif should always describe an 8-character long peptide. When a an
+octapeptide matches the regex, its 4th peptidic bond (ie, between the
+4th and 5th letter) will be marked for cleaving or reporting.
+
+For example, the peptide AMQRNLAW is recognized as follows:
+
+    .----..----.----..----. .-----.-----.-----.-----.
+    | A  || M  | Q  || R  |*|  N  |  L  |  A  |  W  |
+    |----||----|----||----|^|-----|-----|-----|-----|
+    | P4 || P3 | P2 || P1 ||| P1' | P2' | P3' | P4' |
+    '----''----'----''----'|'-----'-----'-----'-----'
+                      cleavage site
+
+
+=item * a code reference.
+
+    my $specificity = sub {
+        my $peptide = shift;
+
+        # ... some code that decides
+        # ... if $peptide should be cut or not
+
+        if ( peptide_should_be_cut ) { return 1 }
+        else                         { return   }
+    }
+
+    my $enzyme = Bio::Protease->new(specificity => $coderef);
+
+The code reference will be used by the methods C<digest>, C<cut> and
+C<cleavage_sites>. It will always be passed a string with a length of 8
+characters; if the coderef returns true, then the peptide bond between
+the 4th and 5th residues will be marked as siscile, and the appropiate
+action will be performed depending on which method was called.
+
+=back
+
+=cut
+
+=head2 digest($substrate)
+
+Performs a complete digestion of the peptide argument, returning a list
+with possible products. It does not do partial digests (see method
+C<cut> for that).
+
+    my @products = $enzyme->digest($protein);
+
+=head2 cut($substrate, $i)
+
+Attempt to cleave $substrate at the C-terminal end of the $i-th residue
+(ie, at the right). If the bond is indeed cleavable (determined by the
+enzyme's specificity), then a list with the two products of the
+hydrolysis will be returned. Otherwise, returns false.
+
+    my @products = $enzyme->cut($peptide, $position);
+
+=head2 cleavage_sites($protein)
+
+Returns a list with siscile bonds (bonds susceptible to be cleaved as
+determined by the enzyme's specificity). Bonds are numbered starting
+from 1, from N to C-terminal.
+
+=cut
+
+=head1 Class Attributes
+
+=head2 Specificities
+
+A list will all the available regexep-based specificities.
+
+    my @protease_pool = do {
+        Bio::Protease->new(specificity => $_)
+            for Bio::Protease->Specificities;
+    }
+
+As a rule, all specificity names are lower case. Currently, they include:
+
+=over 2
+
+=item * arg-cproteinase
+
+=item * asp-nendopeptidase
+
+=item * asp-nendopeptidase glu
+
+=item * bnps skatole
+
+=item * caspase 1
+
+=item * caspase 2
+
+=item * caspase 3
+
+=item * caspase 4
+
+=item * caspase 5
+
+=item * caspase 6
+
+=item * caspase 7
+
+=item * caspase 8
+
+=item * caspase 9
+
+=item * caspase 10
+
+=item * chymotrypsin
+
+=item * chymotrypsin low
+
+=item * clostripain
+
+=item * cnbr
+
+=item * enterokinase
+
+=item * factor xa
+
+=item * formic acid
+
+=item * glutamyl endopeptidase
+
+=item * granzymeb
+
+=item * hydroxylamine
+
+=item * iodosobenzoic acid
+
+=item * lysc
+
+=item * lysn
+
+=item * ntcb
+
+=item * pepsin ph1.3
+
+=item * pepsin
+
+=item * proline endopeptidase
+
+=item * proteinase k
+
+=item * staphylococcal peptidase i
+
+=item * thermolysin
+
+=item * thrombin
+
+=item * trypsin
+
+=back
+
+For a complete description of their specificities, you can check out
+<link here>, or look at the regular expressions of their definitions
+in this same file.
+
+=cut
+
+=head1 SEE ALSO
+
+Bio::Tools::SeqPattern Bio::Seq
+
+PeptideCutter. This module's idea is largely based on Expasy's
+PeptideCutter. For more information on the experimental evidence that
+supports both the algorithm and the specificity definitions, check their
+page.
 
 =head1 AUTHOR
 
@@ -195,7 +385,6 @@ Bruno Vecchi, C<< <vecchi.b at gmail.com> >>
 Please report any bugs or feature requests to C<bug-bio-protease at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Bio-Protease>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
-
 
 
 
@@ -227,9 +416,6 @@ L<http://cpanratings.perl.org/d/Bio-Protease>
 L<http://search.cpan.org/dist/Bio-Protease/>
 
 =back
-
-
-=head1 ACKNOWLEDGEMENTS
 
 
 =head1 COPYRIGHT & LICENSE
