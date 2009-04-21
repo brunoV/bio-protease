@@ -69,8 +69,13 @@ sub _regex_to_coderef {
 
     return sub {
         my $substrate = shift;
-        unless ( length $substrate == 8 ) {
-            $substrate .= 'X' x (8 - length $substrate);
+        my $length = length $substrate;
+
+        if ( $length < 8 ) {
+            if ( $length > 4 ) {
+                $substrate .= 'X' x (8 - length $substrate);
+            }
+            else { return }
         }
 
         if ( grep { $substrate !~ /$_/ } @regexes ) {
@@ -113,7 +118,7 @@ sub digest {
     my @products;
     my ($i, $j) = (0, 0);
 
-    $substrate = 'XXXX' . $substrate;
+    $substrate = 'XXX' . $substrate;
     while ( my $pep = substr($substrate, $i, 8) ) {
         if ( $self->_cuts( $pep ) ) {
             my $product = substr($substrate, $j, $i + 4 - $j);
@@ -134,10 +139,10 @@ sub cleavage_sites {
     my ( $self, $substrate ) = @_;
     $substrate = uc $substrate;
     my @sites;
-    my $i = 0;
+    my $i = 1;
 
-    $substrate = 'XXXX' . $substrate;
-    while ( my $pep = substr($substrate, $i, 8 ) ) {
+    $substrate = 'XXX' . $substrate;
+    while ( my $pep = substr($substrate, $i-1, 8 ) ) {
         if ( $self->_cuts( $pep ) ) { push @sites, $i };
         ++$i;
     }
@@ -460,6 +465,7 @@ BEGIN {
         'glutamyl endopeptidase'     => [ '.{3}E.{4}' ],
         'granzymeb'                  => [ 'IEPD.{4}' ],
         'hydroxylamine'              => [ '.{3}NG.{3}' ],
+        'hcl'                        => [ '.{8}' ],
         'iodosobenzoic acid'         => [ '.{3}W.{4}' ],
         'lysc'                       => [ '.{3}K.{4}' ],
         'lysn'                       => [ '.{4}K.{3}' ],
