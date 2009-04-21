@@ -36,7 +36,7 @@ has _specif_code => (
 );
 
 coerce 'Specificity',
-    from 'Str', via { _str_to_specificity($_) },
+    from 'Str',        via { _str_to_specificity($_)     },
     from 'SeqPattern', via { _pattern_to_specificity($_) };
 
 sub _cuts {
@@ -276,7 +276,7 @@ from 1, from N to C-terminal.
 
 =head2 Specificities
 
-A list will all the available regexep-based specificities.
+A list with all the available regexep-based specificities.
 
     my @protease_pool = do {
         Bio::Protease->new(specificity => $_)
@@ -368,13 +368,12 @@ in this same file.
 =cut
 
 =head1 SEE ALSO
+L<Bio::Tools::SeqPattern>,  L<Bio::Seq>.
 
-Bio::Tools::SeqPattern Bio::Seq
-
-PeptideCutter. This module's idea is largely based on Expasy's
-PeptideCutter. For more information on the experimental evidence that
-supports both the algorithm and the specificity definitions, check their
-page.
+PeptideCutter This module's idea is largely based on Expasy's
+PeptideCutter(L<http://www.expasy.ch/tools/peptidecutter/>). For more
+information on the experimental evidence that supports both the
+algorithm and the specificity definitions, check their page.
 
 =head1 AUTHOR
 
@@ -382,9 +381,14 @@ Bruno Vecchi, C<< <vecchi.b at gmail.com> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-bio-protease at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Bio-Protease>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
+Please report any bugs or feature request via the github issue tracker
+(L<http://github.com/brunoV/bio-protease/issues>).
+
+=cut
+
+#Please report any bugs or feature requests to C<bug-bio-protease at rt.cpan.org>, or through
+#the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Bio-Protease>.  I will be notified, and then you'll
+#automatically be notified of progress on your bug as I make changes.
 
 
 
