@@ -56,16 +56,16 @@ is_deeply($results, $true_values);
 my $seq = 'AARAGQTVRFSDAAA';
 my $protease = Bio::Protease->new(specificity => 'trypsin');
 
-warning_like { !$protease->cut($seq) } qr/Incorrect position/;
+warning_like { !$protease->cut($seq)      } qr/Incorrect position/;
+warning_like { !$protease->cut($seq, 100) } qr/Incorrect position/;
 
 ok !$protease->cut($seq, 1);
 
 is_deeply([ $protease->cut($seq, 3) ], [ 'AAR', 'AGQTVRFSDAAA' ]);
 is_deeply([ $protease->cut($seq, 9) ], [ 'AARAGQTVR', 'FSDAAA' ]);
 
-#is_deeply(\@digest_products, \@cut_products);
-
 # test digest
+$protease = Bio::Protease->new(specificity => 'trypsin');
 @products = $protease->digest($seq);
 
 is_deeply( [@products], ['AAR', 'AGQTVR', 'FSDAAA'] );

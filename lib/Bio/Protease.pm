@@ -90,13 +90,14 @@ sub cut {
     my ( $self, $substrate, $pos ) = @_;
 
     unless ( defined $pos and $pos > 0 and $pos <= length $substrate ) {
+
         carp "Incorrect position.";
         return;
     }
 
     $substrate = uc $substrate;
-    $substrate = 'XXXX'. $substrate;
-    $pos += 4;
+    $substrate = 'XXX'. $substrate;
+    $pos += 3;
 
     my $pep = substr($substrate, $pos - 4, 8);
 
