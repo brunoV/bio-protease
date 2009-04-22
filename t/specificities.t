@@ -67,3 +67,5 @@ is_deeply([ $protease->cut($seq, 9) ], [ 'AARAGQTVR', 'FSDAAA' ]);
 
 # test digest
 @products = $protease->digest($seq);
+
+is_deeply( [@products], ['AAR', 'AGQTVR', 'FSDAAA'] );
