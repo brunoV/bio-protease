@@ -4,6 +4,10 @@ use Moose;
 use MooseX::ClassAttribute;
 use Moose::Util::TypeConstraints;
 use Carp;
+use Memoize;
+memoize ('cleavage_sites');
+memoize ('is_substrate');
+memoize ('_cuts');
 
 my %specificity_of;
 
@@ -115,7 +119,6 @@ sub cut {
 sub digest {
     my ( $self, $substrate ) = @_;
     $substrate = uc $substrate;
-
     my @products;
     my ($i, $j) = (0, 0);
 
@@ -149,6 +152,18 @@ sub cleavage_sites {
     }
     return @sites;
 }
+
+sub is_substrate {
+    my ($self, $substrate) = @_;
+
+    for my $pos (1 .. length $substrate) {
+        return 1 if $self->cut($substrate, $pos);
+    }
+
+    return;
+}
+
+
 
 our $VERSION = '0.01';
 
