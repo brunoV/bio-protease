@@ -27,21 +27,21 @@ class_has 'Specificities' => (
     default => sub { [ keys %specificity_of ] },
 );
 
-subtype 'Specificity' => as 'CodeRef';
-subtype 'SeqPattern'
+subtype 'Bio::Protease::Specificity' => as 'CodeRef';
+subtype 'Bio::Protease::SeqPattern'
     => as class_type('Bio::Tools::SeqPattern');
 
 has _specif_code => (
    is         => 'ro',
-   isa        => 'Specificity',
+   isa        => 'Bio::Protease::Specificity',
    init_arg   => 'specificity',
    required   => 1,
    coerce     => 1,
 );
 
-coerce 'Specificity',
-    from 'Str',        via { _str_to_specificity($_)     },
-    from 'SeqPattern', via { _pattern_to_specificity($_) };
+coerce 'Bio::Protease::Specificity',
+    from 'Str',                       via { _str_to_specificity($_)     },
+    from 'Bio::Protease::SeqPattern', via { _pattern_to_specificity($_) };
 
 sub _cuts {
     my $self = shift;
