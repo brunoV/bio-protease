@@ -5,37 +5,37 @@ enterokinase:
 granzymeb:
   - 0
   - []
-caspase 1:
+caspase_1:
   - 0
   - []
-caspase 2:
+caspase_2:
   - 0
   - []
-caspase 3:
+caspase_3:
   - 0
   - []
-caspase 4:
+caspase_4:
   - 0
   - []
-caspase 5:
+caspase_5:
   - 0
   - []
-caspase 6:
+caspase_6:
   - 0
   - []
-caspase 7:
+caspase_7:
   - 0
   - []
-caspase 8:
+caspase_8:
   - 0
   - []
-caspase 9:
+caspase_9:
   - 0
   - []
-caspase 10:
+caspase_10:
   - 0
   - []
-arg-c proteinase:
+arg-c_proteinase:
    - 66
    -
      - 38
@@ -104,7 +104,7 @@ arg-c proteinase:
      - 1223
      - 1256
      - 1257
-asp-n endopeptidase:
+asp-n_endopeptidase:
    - 70
    -
      - 47
@@ -177,7 +177,7 @@ asp-n endopeptidase:
      - 1179
      - 1199
      - 1264
-asp-n endopeptidase glu:
+asp-n_endopeptidase_glu:
    - 111
    -
      - 47
@@ -291,7 +291,7 @@ asp-n endopeptidase glu:
      - 1179
      - 1199
      - 1264
-bnps skatole:
+bnps_skatole:
    - 18
    -
      - 34
@@ -450,7 +450,7 @@ chymotrypsin:
      - 1249
      - 1258
      - 1260
-chymotrypsin low:
+chymotrypsin_low:
    - 221
    -
      - 1
@@ -743,12 +743,12 @@ clostripain:
      - 1223
      - 1256
      - 1257
-factor xa:
+factor_xa:
    - 2
    -
      - 638
      - 998
-formic acid:
+formic_acid:
    - 70
    -
      - 48
@@ -821,7 +821,7 @@ formic acid:
      - 1180
      - 1200
      - 1265
-glutamyl endopeptidase:
+glutamyl_endopeptidase:
    - 41
    -
      - 54
@@ -888,7 +888,7 @@ hydroxylamine:
      - 1183
      - 1196
      - 1251
-iodosobenzoic acid:
+iodosobenzoic_acid:
    - 18
    -
      - 34
@@ -1035,7 +1035,7 @@ ntcb:
      - 172
      - 355
      - 467
-pepsin ph1.3:
+pepsin_ph1.3:
    - 271
    -
      - 6
@@ -1496,13 +1496,13 @@ pepsin:
      - 1233
      - 1248
      - 1249
-proline endopeptidase:
+proline_endopeptidase:
    - 3
    -
      - 288
      - 632
      - 992
-proteinase k:
+proteinase_k:
    - 408
    -
      - 2
@@ -1913,7 +1913,7 @@ proteinase k:
      - 1263
      - 1264
      - 1266
-staphylococcal peptidase i:
+staphylococcal_peptidase_i:
    - 38
    -
      - 54
