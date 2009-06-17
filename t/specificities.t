@@ -1,6 +1,6 @@
 use Modern::Perl;
 
-use lib qw(../lib);
+use lib qw(/home/brunov/lib/Bio-Protease/lib);
 use Test::More qw(no_plan);
 use Test::Exception;
 use Test::Warn;
@@ -44,7 +44,7 @@ my $true_values = Load $data;
 
 my $results;
 my @products;
-foreach my $specificity ( @{Bio::Protease->Specificities} ) {
+foreach my $specificity ( keys %{Bio::Protease->Specificities} ) {
     my $protease = Bio::Protease->new(specificity => $specificity);
     my @cleavage_sites = $protease->cleavage_sites($test_seq);
     $results->{$specificity} =  [scalar @cleavage_sites, [@cleavage_sites] ];

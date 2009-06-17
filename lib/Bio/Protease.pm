@@ -1,177 +1,100 @@
 package Bio::Protease;
-use 5.010_000;
 use Moose;
 use MooseX::ClassAttribute;
-use Moose::Util::TypeConstraints;
-use Carp;
-use Memoize qw(memoize flush_cache);
-memoize ('cleavage_sites');
-memoize ('is_substrate');
-memoize ('digest');
-memoize ('_cuts');
+use MooseX::Types::Moose qw(HashRef);
+use namespace::autoclean;
+use Bio::Protease::Types qw(ProteaseRegex ProteaseName);
+extends qw(Bio::ProteaseI);
 
-my %specificity_of;
-
-=head1 NAME
-
-Bio::Protease - A class that describes a proteolytic enzyme.
-
-=head1 VERSION
-
-Version 0.01
-
-=cut
-
-class_has 'Specificities' => (
+class_has Specificities => (
     is      => 'ro',
-    isa     => 'ArrayRef',
-    default => sub { [ keys %specificity_of ] },
+    isa     => HashRef,
+    lazy_build => 1,
 );
 
-subtype 'Bio::Protease::Specificity' => as 'CodeRef';
-subtype 'Bio::Protease::SeqPattern'
-    => as class_type('Bio::Tools::SeqPattern');
+sub BUILDARGS {
+    my ($class, %args) = @_;
 
-has _specif_code => (
-   is         => 'ro',
-   isa        => 'Bio::Protease::Specificity',
-   init_arg   => 'specificity',
-   required   => 1,
-   coerce     => 1,
+    $args{_regex} = $args{specificity};
+
+    $class->SUPER::BUILDARGS(%args);
+}
+
+has _regex => (
+    is  => 'ro',
+    isa => ProteaseRegex,
+    coerce => 1,
 );
 
-coerce 'Bio::Protease::Specificity',
-    from 'Str',                       via { _str_to_specificity($_)     },
-    from 'Bio::Protease::SeqPattern', via { _pattern_to_specificity($_) };
+has specificity => (
+    is  => 'ro',
+    isa => ProteaseName,
+    required => 1,
+    coerce   => 1
+);
 
-sub _cuts {
-    my $self = shift;
-    return $self->_specif_code->(@_);
-}
+augment _cuts => sub {
+    my ($self, $peptide) = @_;
 
-sub _str_to_specificity {
-    my $specificity = shift;
-
-    croak "Not a known specificity\n"
-        unless $specificity ~~ @{__PACKAGE__->Specificities};
-
-    my @regexes = @{$specificity_of{$specificity}};
-
-    my $coderef = _regex_to_coderef(@regexes);
-    return $coderef;
-}
-
-sub _pattern_to_specificity {
-    my $pattern_obj = shift;
-    my $regex = $pattern_obj->str;
-
-    my $coderef = _regex_to_coderef($regex);
-    return $coderef;
-}
-
-sub _regex_to_coderef {
-    my @regexes = @_;
-
-    return sub {
-        my $substrate = shift;
-        my $length = length $substrate;
-
-        if ( $length < 8 ) {
-            if ( $length > 4 ) {
-                $substrate .= 'X' x (8 - length $substrate);
-            }
-            else { return }
-        }
-
-        if ( grep { $substrate !~ /$_/ } @regexes ) {
-            return;
-        } else {
-            return 1;
-        }
-    }
-}
-
-sub cut {
-    my ( $self, $substrate, $pos ) = @_;
-
-    unless ( defined $pos and $pos > 0 and $pos <= length $substrate ) {
-
-        carp "Incorrect position.";
+    if ( grep { $$peptide !~ /$_/ } @{$self->_regex} ) {
         return;
     }
 
-    $substrate = uc $substrate;
-    $substrate = 'XXX'. $substrate;
-    $pos += 3;
+    return 'yes, it cuts';
 
-    my $pep = substr($substrate, $pos - 4, 8);
+};
 
-    if ( $self->_cuts($pep) ) {
-        my $product = substr($substrate, 0, $pos);
-        substr($substrate, 0, $pos) = '';
+sub _build_Specificities {
 
-        s/X//g for ($product, $substrate);
+    my %specificity_of = (
+        'arg-c_proteinase'           => [ '.{3}R.{4}' ],
+        'asp-n_endopeptidase'        => [ '.{4}D.{3}' ],
+        'asp-n_endopeptidase_glu'    => [ '.{4}[DE].{3}' ],
+        'bnps_skatole'               => [ '.{3}W.{4}' ],
+        'caspase_1'                  => [ '[FWYL].[HAT]D[^PEDQKR].{3}' ],
+        'caspase_2'                  => [ 'DVAD[^PEDQKR].{3}' ],
+        'caspase_3'                  => [ 'DMQD[^PEDQKR].{3}' ],
+        'caspase_4'                  => [ 'LEVD[^PEDQKR].{3}' ],
+        'caspase_5'                  => [ '[LW]EHD.{4}' ],
+        'caspase_6'                  => [ 'VE[HI]D[^PEDQKR].{3}' ],
+        'caspase_7'                  => [ 'DEVD[^PEDQKR].{3}' ],
+        'caspase_8'                  => [ '[IL]ETD[^PEDQKR].{3}' ],
+        'caspase_9'                  => [ 'LEHD.{4}' ],
+        'caspase_10'                 => [ 'IEAD.{4}' ],
+        'chymotrypsin'               => [ '.{3}[FY][^P].{3}|.{3}W[^MP].{3}' ],
+        'chymotrypsin_low'           => [ '.{3}[FLY][^P].{3}|.{3}W[^MP].{3}|.{3}M[^PY].{3}|.{3}H[^DMPW].{3}' ],
+        'clostripain'                => [ '.{3}R.{4}' ],
+        'cnbr'                       => [ '.{3}M.{4}' ],
+        'enterokinase'               => [ '[DN][DN][DN]K.{4}' ],
+        'factor_xa'                  => [ '[AFGILTVM][DE]GR.{4}' ],
+        'formic_acid'                => [ '.{3}D.{4}' ],
+        'glutamyl_endopeptidase'     => [ '.{3}E.{4}' ],
+        'granzymeb'                  => [ 'IEPD.{4}' ],
+        'hydroxylamine'              => [ '.{3}NG.{3}' ],
+        'hcl'                        => [ '.{8}' ],
+        'iodosobenzoic_acid'         => [ '.{3}W.{4}' ],
+        'lysc'                       => [ '.{3}K.{4}' ],
+        'lysn'                       => [ '.{4}K.{3}' ],
+        'ntcb'                       => [ '.{4}C.{3}' ],
+        'pepsin_ph1.3'               => [ '.[^HKR][^P][^R][FLWY][^P].{2}|.[^HKR][^P][FLWY].[^P].{2}' ],
+        'pepsin'                     => [ '.[^HKR][^P][^R][FL][^P].{2}|.[^HKR][^P][FL].[^P].{2}' ],
+        'proline_endopeptidase'      => [ '.{2}[HKR]P[^P].{3}' ],
+        'proteinase_k'               => [ '.{3}[AFILTVWY].{4}' ],
+        'staphylococcal_peptidase_i' => [ '.{2}[^E]E.{4}' ],
+        'thermolysin'                => [ '.{3}[^XDE][AFILMV][^P].{2}' ],
+        'thrombin'                   => [ '.{2}GRG.{3}|[AFGILTVM][AFGILTVWA]PR[^DE][^DE].{2}' ],
+        'trypsin'                    => [ '.{2}(?!CKD).{6}', '.{2}(?!DKD).{6}', '.{2}(?!CKH).{6}', '.{2}(?!CKY).{6}', '.{2}(?!RRH).{6}', '.{2}(?!RRR).{6}', '.{2}(?!CRK).{6}',
+                                        '.{3}[KR][^P].{3}|.{2}WKP.{3}|.{2}MRP.{3}' ]
+    );
 
-        return ($product, $substrate);
-    }
-    else { return }
+    return \%specificity_of;
 }
 
-sub digest {
-    my ( $self, $substrate ) = @_;
-    $substrate = uc $substrate;
-    my @products;
-    my ($i, $j) = (0, 0);
+__PACKAGE__->meta->make_immutable;
 
-    $substrate = 'XXX' . $substrate;
-    while ( my $pep = substr($substrate, $i, 8) ) {
-        if ( $self->_cuts( $pep ) ) {
-            my $product = substr($substrate, $j, $i + 4 - $j);
-            push @products, $product;
+__END__
 
-            $j = $i + 4;
-        }
-        $i++;
-    }
-    push @products, substr($substrate, $j - length($substrate));
-
-    s/X//g for @products[0, -1];
-
-    return @products;
-}
-
-sub cleavage_sites {
-    my ( $self, $substrate ) = @_;
-    $substrate = uc $substrate;
-    my @sites;
-    my $i = 1;
-
-    $substrate = 'XXX' . $substrate;
-    while ( my $pep = substr($substrate, $i-1, 8 ) ) {
-        if ( $self->_cuts( $pep ) ) { push @sites, $i };
-        ++$i;
-    }
-    return @sites;
-}
-
-sub is_substrate {
-    my ($self, $substrate) = @_;
-
-    for my $pos (1 .. length $substrate) {
-        return 1 if $self->cut($substrate, $pos);
-    }
-
-    return;
-}
-
-sub DEMOLISH {
-    flush_cache('_cuts');
-    flush_cache('digest');
-    flush_cache('cleavage_sites');
-    flush_cache('is_substrate');
-}
-
-our $VERSION = '0.01';
+=pod
 
 =head1 SYNOPSIS
 
@@ -209,7 +132,7 @@ This models are somewhat simplistic as they are largely regex-based, and
 do not take into account subtleties such as kinetic/temperature effects,
 accessible solvent area, secondary or tertiary structure elements.
 However, the module is flexible enough to allow the inclusion of any of
-these effects via user-defined specificity functions.
+these effects via subclassing from the module's interface, Bio::ProteaseI.
 
 =cut
 
@@ -225,14 +148,12 @@ Set the enzyme's specificity. Required. Could be either of:
 
     my $enzyme = Bio::Protease->new(specificity => 'enterokinase');
 
-There are currently definitions for 36 enzymes/reagents. See C<Specificities>.
+There are currently definitions for 36 enzymes/reagents. See
+C<Specificities>.
 
-=item * a Bio::Tools::SeqPattern object.
+=item * an array reference of regular expressions:
 
-    my $motif = Bio::Tools::SeqPattern->new(
-        -SEQ  => 'MN[ED]K[^P].{3}',
-        -TYPE => 'Amino',
-    );
+    my $motif = ['MN[ED]K[^P].{3}'],
 
     my $enzyme = Bio::Protease->new(specificity => $motif);
 
@@ -249,26 +170,13 @@ For example, the peptide AMQRNLAW is recognized as follows:
     '----''----'----''----'|'-----'-----'-----'-----'
                       cleavage site
 
+Some specificity rules can only be described with more than one regular
+expression (See the case for trypsin, for example). To account for those
+cases, the array reference could contain an arbitrary number of regexes,
+all of which should match the given octapeptide.
 
-=item * a code reference.
-
-    my $specificity = sub {
-        my $peptide = shift;
-
-        # ... some code that decides
-        # ... if $peptide should be cut or not
-
-        if ( peptide_should_be_cut ) { return 1 }
-        else                         { return   }
-    }
-
-    my $enzyme = Bio::Protease->new(specificity => $coderef);
-
-The code reference will be used by the methods C<digest>, C<cut> and
-C<cleavage_sites>. It will always be passed a string with a length of 8
-characters; if the coderef returns true, then the peptide bond between
-the 4th and 5th residues will be marked as siscile, and the appropiate
-action will be performed depending on which method was called.
+In the case your particular specificity rule requires an "or" clause,
+you can use the "|" separator in a single regex.
 
 =back
 
@@ -303,11 +211,13 @@ from 1, from N to C-terminal.
 
 =head2 Specificities
 
-A list with all the available regexep-based specificities.
+A hash reference with all the available regexep-based specificities. The
+keys are the specificity names, the value is an arrayref with the
+regular expressions that define it.
 
     my @protease_pool = do {
         Bio::Protease->new(specificity => $_)
-            for Bio::Protease->Specificities;
+            for keys %{Bio::Protease->Specificities};
     }
 
 As a rule, all specificity names are lower case. Currently, they include:
@@ -417,8 +327,6 @@ Please report any bugs or feature request via the github issue tracker
 #the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Bio-Protease>.  I will be notified, and then you'll
 #automatically be notified of progress on your bug as I make changes.
 
-
-
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
@@ -458,52 +366,3 @@ under the same terms as Perl itself.
 
 
 =cut
-
-### Enzyme specificities
-
-BEGIN {
-    %specificity_of = (
-        'arg-c_proteinase'           => [ '.{3}R.{4}' ],
-        'asp-n_endopeptidase'        => [ '.{4}D.{3}' ],
-        'asp-n_endopeptidase_glu'    => [ '.{4}[DE].{3}' ],
-        'bnps_skatole'               => [ '.{3}W.{4}' ],
-        'caspase_1'                  => [ '[FWYL].[HAT]D[^PEDQKR].{3}' ],
-        'caspase_2'                  => [ 'DVAD[^PEDQKR].{3}' ],
-        'caspase_3'                  => [ 'DMQD[^PEDQKR].{3}' ],
-        'caspase_4'                  => [ 'LEVD[^PEDQKR].{3}' ],
-        'caspase_5'                  => [ '[LW]EHD.{4}' ],
-        'caspase_6'                  => [ 'VE[HI]D[^PEDQKR].{3}' ],
-        'caspase_7'                  => [ 'DEVD[^PEDQKR].{3}' ],
-        'caspase_8'                  => [ '[IL]ETD[^PEDQKR].{3}' ],
-        'caspase_9'                  => [ 'LEHD.{4}' ],
-        'caspase_10'                 => [ 'IEAD.{4}' ],
-        'chymotrypsin'               => [ '.{3}[FY][^P].{3}|.{3}W[^MP].{3}' ],
-        'chymotrypsin_low'           => [ '.{3}[FLY][^P].{3}|.{3}W[^MP].{3}|.{3}M[^PY].{3}|.{3}H[^DMPW].{3}' ],
-        'clostripain'                => [ '.{3}R.{4}' ],
-        'cnbr'                       => [ '.{3}M.{4}' ],
-        'enterokinase'               => [ '[DN][DN][DN]K.{4}' ],
-        'factor_xa'                  => [ '[AFGILTVM][DE]GR.{4}' ],
-        'formic_acid'                => [ '.{3}D.{4}' ],
-        'glutamyl_endopeptidase'     => [ '.{3}E.{4}' ],
-        'granzymeb'                  => [ 'IEPD.{4}' ],
-        'hydroxylamine'              => [ '.{3}NG.{3}' ],
-        'hcl'                        => [ '.{8}' ],
-        'iodosobenzoic_acid'         => [ '.{3}W.{4}' ],
-        'lysc'                       => [ '.{3}K.{4}' ],
-        'lysn'                       => [ '.{4}K.{3}' ],
-        'ntcb'                       => [ '.{4}C.{3}' ],
-        'pepsin_ph1.3'               => [ '.[^HKR][^P][^R][FLWY][^P].{2}|.[^HKR][^P][FLWY].[^P].{2}' ],
-        'pepsin'                     => [ '.[^HKR][^P][^R][FL][^P].{2}|.[^HKR][^P][FL].[^P].{2}' ],
-        'proline_endopeptidase'      => [ '.{2}[HKR]P[^P].{3}' ],
-        'proteinase_k'               => [ '.{3}[AFILTVWY].{4}' ],
-        'staphylococcal_peptidase_i' => [ '.{2}[^E]E.{4}' ],
-        'thermolysin'                => [ '.{3}[^XDE][AFILMV][^P].{2}' ],
-        'thrombin'                   => [ '.{2}GRG.{3}|[AFGILTVM][AFGILTVWA]PR[^DE][^DE].{2}' ],
-        'trypsin'                    => [ '.{2}(?!CKD).{6}', '.{2}(?!DKD).{6}', '.{2}(?!CKH).{6}', '.{2}(?!CKY).{6}', '.{2}(?!RRH).{6}', '.{2}(?!RRR).{6}', '.{2}(?!CRK).{6}',
-                                        '.{3}[KR][^P].{3}|.{2}WKP.{3}|.{2}MRP.{3}' ]
-    );
-}
-
-no Moose;
-__PACKAGE__->meta->make_immutable;
-1;
