@@ -4,9 +4,10 @@ use Moose;
 use MooseX::ClassAttribute;
 use Moose::Util::TypeConstraints;
 use Carp;
-use Memoize;
+use Memoize qw(memoize flush_cache);
 memoize ('cleavage_sites');
 memoize ('is_substrate');
+memoize ('digest');
 memoize ('_cuts');
 
 my %specificity_of;
@@ -163,7 +164,12 @@ sub is_substrate {
     return;
 }
 
-
+sub DEMOLISH {
+    flush_cache('_cuts');
+    flush_cache('digest');
+    flush_cache('cleavage_sites');
+    flush_cache('is_substrate');
+}
 
 our $VERSION = '0.01';
 
