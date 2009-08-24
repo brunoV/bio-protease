@@ -32,6 +32,7 @@ sub cut {
 
         return ($product, $substrate);
     }
+
     else { return }
 }
 

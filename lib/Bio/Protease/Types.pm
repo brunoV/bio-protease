@@ -11,7 +11,7 @@ subtype ProteaseRegex, as ArrayRef;
 coerce ProteaseRegex, from Str, via { _str_to_prot_regex($_) };
 
 coerce ProteaseName,
-    from 'ArrayRef', via { 'custom' };
+    from ArrayRef, via { 'custom' };
 
 sub _str_to_prot_regex {
     my $specificity = shift;
