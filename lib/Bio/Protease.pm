@@ -4,7 +4,7 @@ use MooseX::ClassAttribute;
 use MooseX::Types::Moose qw(HashRef);
 use namespace::autoclean;
 use Bio::Protease::Types qw(ProteaseRegex ProteaseName);
-extends qw(Bio::ProteaseI);
+extends 'Bio::ProteaseI';
 
 class_has Specificities => (
     is      => 'ro',

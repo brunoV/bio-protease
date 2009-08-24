@@ -7,7 +7,6 @@ use namespace::autoclean;
 memoize ('cleavage_sites');
 memoize ('is_substrate');
 memoize ('digest');
-memoize ('_cuts');
 
 sub cut {
     my ( $self, $substrate, $pos ) = @_;
@@ -104,7 +103,6 @@ sub cleavage_sites {
 }
 
 sub DEMOLISH {
-    flush_cache('_cuts');
     flush_cache('digest');
     flush_cache('cleavage_sites');
     flush_cache('is_substrate');
