@@ -136,16 +136,17 @@ Bio::ProteaseI - A base class to build your customized Protease
 
 =head1 DESCRIPTION
 
-This module describes the interface for Bio::Protease. You only need to
-use this if you want to build your custom specificity protease and
-regular expressions won't do; otherwise look at Bio::Protease instead.
+This module describes the interface for L<Bio::Protease>. You only need
+to use this if you want to build your custom specificity protease and
+regular expressions won't do; otherwise look at L<Bio::Protease>
+instead.
 
 =head1 METHODS
 
-All of the methods provided in Bio::Protease (namely, cut, digest,
-is_substrate and cleavage_sites) are defined here, incluiding a stub of
-the specificity-determining one, '_cuts'. It has to be completed by the
-subclass with an 'augment' call.
+All of the methods provided in Bio::Protease (namely, C<cut>, C<digest>,
+C<is_substrate> and C<cleavage_sites>) are defined here, incluiding a
+stub of the specificity-determining one, C<_cuts>. It has to be
+completed by the subclass with an C<augment> call.
 
 =head1 HOW TO SUBCLASS
 
@@ -187,7 +188,7 @@ L<Moose::Manual::MethodModifiers>), like so:
 
 And that's it. Your class will inherit all the methods mentioned above,
 and will work according to the specificity logic that you define in your
-_cuts() subroutine.
+C<_cuts()> subroutine.
 
 =head2 Example: a ridiculously specific protease.
 

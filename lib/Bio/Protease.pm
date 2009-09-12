@@ -103,7 +103,7 @@ __END__
     use Bio::Protease;
     my $protease = Bio::Protease->new(specificity => 'trypsin');
 
-    my $protein = 'MRAERVIKP'; # Could also be a Bio::Seq object.
+    my $protein = 'MRAERVIKP';
 
     # Perform a full digestion
     my @products = $protease->digest($protein);
@@ -126,7 +126,7 @@ __END__
 =head1 WARNING: ALPHA CODE
 
 This module is still in its infancy, and I might change its interface in
-the future (although I'm not planning to). Use at your own discretion
+the future (although I'm not planning to). Use it at your own discretion
 (but please do, and send feedback!).
 
 =head1 DESCRIPTION
@@ -140,7 +140,10 @@ This models are somewhat simplistic as they are largely regex-based, and
 do not take into account subtleties such as kinetic/temperature effects,
 accessible solvent area, secondary or tertiary structure elements.
 However, the module is flexible enough to allow the inclusion of any of
-these effects by subclassing from the module's interface, Bio::ProteaseI.
+these effects by subclassing from the module's interface,
+L<Bio::ProteaseI>. Alternatively, if your desired specificity can be
+correctly described by a regular expression, you can pass it as a string
+the specificity attribute at construction time. See L<specificity> below.
 
 =cut
 
@@ -157,7 +160,7 @@ Set the enzyme's specificity. Required. Could be either of:
     my $enzyme = Bio::Protease->new(specificity => 'enterokinase');
 
 There are currently definitions for 36 enzymes/reagents. See
-C<Specificities>.
+L<Specificities>.
 
 =item * an array reference of regular expressions:
 
@@ -221,7 +224,7 @@ from 1, from N to C-terminal.
 
 A hash reference with all the available regexep-based specificities. The
 keys are the specificity names, the value is an arrayref with the
-regular expressions that define it.
+regular expressions that define them.
 
     my @protease_pool = do {
         Bio::Protease->new(specificity => $_)
@@ -315,9 +318,15 @@ file.
 
 =head1 SEE ALSO
 
-PeptideCutter This module's idea is largely based on Expasy's
-PeptideCutter(L<http://www.expasy.ch/tools/peptidecutter/>). For more
+=over
+
+=item * PeptideCutter
+
+This module's idea is largely based on Expasy's
+PeptideCutter (L<http://www.expasy.ch/tools/peptidecutter/>). For more
 information on the experimental evidence that supports both the
 algorithm and the specificity definitions, check their page.
+
+=back
 
 =cut

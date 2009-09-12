@@ -57,8 +57,8 @@ these effects via user-defined specificity functions.
 
 ### Support for custom specificities
 
-You can customize your protease's specificity either using a code
-reference or a Bio::Tools::SeqPattern object in the **specificity**
+You can customize your protease's specificity either subclassing
+Bio::ProteaseI, or using a custom regex in the **specificity**
 attribute. The underlying model allows for up to 8 residues surrounding
 the siscile bond (P4-P1, P1'-P4'):
 
@@ -68,15 +68,6 @@ the siscile bond (P4-P1, P1'-P4'):
     | P4 || P3 | P2 || P1 ||| P1' | P2' | P3' | P4' |
     '----''----'----''----'|'-----'-----'-----'-----'
                       cleavage site
-
-### Dependencies
-
-This module depends on:
-
-- Moose
-- MooseX::ClassAttributes
-- Test::More
-- Pod::Usage
 
 ### Installation
 

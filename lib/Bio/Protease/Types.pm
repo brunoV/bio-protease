@@ -35,7 +35,7 @@ Bio::Protease::Types - Specific types for Bio::Protease
 
 =head1 DESCRIPTION
 
-This module define specific types and type coercions to be used by
+This module defines specific types and type coercions to be used by
 Bio::Protease. It should not be used by end users, nor is necessary to
 subclass from Bio::ProteaseI.
 
