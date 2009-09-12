@@ -13,7 +13,7 @@ This models are somewhat simplistic as they are largely regex-based, and
 do not take into account subtleties such as kinetic/temperature effects,
 accessible solvent area, secondary or tertiary structure elements.
 However, the module is flexible enough to allow the inclusion of any of
-these effects via user-defined specificity functions.
+these effects via user-defined regexes or by subclassing.
 
 ### Currently implemented specificities:
 

@@ -135,7 +135,7 @@ This module models the hydrolitic behaviour of a proteolytic enzyme.
 Its main purpose is to predict the outcome of hydrolitic cleavage of a
 peptidic substrate.
 
-The enzyme specificity is currently modeled for 32 enzymes/reagents.
+The enzyme specificity is currently modeled for 36 enzymes/reagents.
 This models are somewhat simplistic as they are largely regex-based, and
 do not take into account subtleties such as kinetic/temperature effects,
 accessible solvent area, secondary or tertiary structure elements.
@@ -237,35 +237,35 @@ As a rule, all specificity names are lower case. Currently, they include:
 
 =item * arg-cproteinase
 
-=item * asp-n endopeptidase
+=item * asp-n_endopeptidase
 
-=item * asp-n endopeptidase glu
+=item * asp-n_endopeptidase_glu
 
-=item * bnps skatole
+=item * bnps_skatole
 
-=item * caspase 1
+=item * caspase_1
 
-=item * caspase 2
+=item * caspase_2
 
-=item * caspase 3
+=item * caspase_3
 
-=item * caspase 4
+=item * caspase_4
 
-=item * caspase 5
+=item * caspase_5
 
-=item * caspase 6
+=item * caspase_6
 
-=item * caspase 7
+=item * caspase_7
 
-=item * caspase 8
+=item * caspase_8
 
-=item * caspase 9
+=item * caspase_9
 
-=item * caspase 10
+=item * caspase_10
 
 =item * chymotrypsin
 
-=item * chymotrypsin low
+=item * chymotrypsin_low
 
 =item * clostripain
 
@@ -273,17 +273,17 @@ As a rule, all specificity names are lower case. Currently, they include:
 
 =item * enterokinase
 
-=item * factor xa
+=item * factor_xa
 
-=item * formic acid
+=item * formic_acid
 
-=item * glutamyl endopeptidase
+=item * glutamyl_endopeptidase
 
 =item * granzymeb
 
 =item * hydroxylamine
 
-=item * iodosobenzoic acid
+=item * iodosobenzoic_acid
 
 =item * lysc
 
@@ -291,15 +291,15 @@ As a rule, all specificity names are lower case. Currently, they include:
 
 =item * ntcb
 
-=item * pepsin ph1.3
+=item * pepsin_ph1.3
 
 =item * pepsin
 
-=item * proline endopeptidase
+=item * proline_endopeptidase
 
-=item * proteinase k
+=item * proteinase_k
 
-=item * staphylococcal peptidase i
+=item * staphylococcal_peptidase i
 
 =item * thermolysin
 
