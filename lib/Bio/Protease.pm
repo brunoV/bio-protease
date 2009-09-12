@@ -123,6 +123,12 @@ __END__
 
 =cut
 
+=head1 WARNING: ALPHA CODE
+
+This module is still in its infancy, and I might change its interface in
+the future (although I'm not planning to). Use at your own discretion
+(but please do, and send feedback!).
+
 =head1 DESCRIPTION
 
 This module models the hydrolitic behaviour of a proteolytic enzyme.
@@ -134,7 +140,7 @@ This models are somewhat simplistic as they are largely regex-based, and
 do not take into account subtleties such as kinetic/temperature effects,
 accessible solvent area, secondary or tertiary structure elements.
 However, the module is flexible enough to allow the inclusion of any of
-these effects via subclassing from the module's interface, Bio::ProteaseI.
+these effects by subclassing from the module's interface, Bio::ProteaseI.
 
 =cut
 
@@ -301,8 +307,9 @@ As a rule, all specificity names are lower case. Currently, they include:
 =back
 
 For a complete description of their specificities, you can check out
-<link here>, or look at the regular expressions of their definitions
-in this same file.
+L<http://www.expasy.ch/tools/peptidecutter/peptidecutter_enzymes.html>,
+or look at the regular expressions of their definitions in this same
+file.
 
 =cut
 

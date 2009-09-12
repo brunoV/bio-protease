@@ -125,7 +125,7 @@ Bio::ProteaseI - A base class to build your customized Protease
     extends qw(Bio::ProteaseI);
 
     augment _cuts => sub {
-        my $substrate = shift;
+        my ($self, $substrate) = @_;
 
         # some code that decides
         # if $peptide should be cut or not
@@ -149,13 +149,74 @@ subclass with an 'augment' call.
 
 =head1 HOW TO SUBCLASS
 
-This subroutine will be used by the methods C<digest>, C<cut>,
-C<cleavage_sites> and C<is_substrate> It will always be passed a string
-with a length of 8 characters; if the subroutine returns true, then the
-peptide bond between the 4th and 5th residues will be marked as siscile,
-and the appropiate action will be performed depending on which method
-was called
+=head2 Step 1: create a child class.
 
-TODO
+    package My::Protease;
+    use Moose;
+    extends qw(Bio::ProteaseI);
+
+    1;
+
+Simply create a new Moose class, and inherit from the Bio::ProteaseI
+interfase using C<extends>.
+
+=head2 Step 2: augment _cuts()
+
+The C<_cuts> subroutine will be used by the methods C<digest>, C<cut>,
+C<cleavage_sites> and C<is_substrate>. It will B<always> be passed a
+reference to a string of 8 characters; if the subroutine returns true,
+then the peptide bond between the 4th and 5th residues will be marked as
+siscile, and the appropiate action will be performed depending on which
+method was called.
+
+Your specificity logic should only be concerned in deciding whether the
+8-residue long peptide passed to it as an argument should be cut between
+the 4th and 5th residues. This is done by using the C<augment> method
+modifier (for more information on Method Modifiers, please read up on
+L<Moose::Manual::MethodModifiers>), like so:
+
+    augment _cuts => sub {
+        my ( $self, $peptide ) = @_;
+
+        # some code that decides
+        # if $peptide should be cut or not
+
+        if ( $peptide_should_be_cut ) { return 1 }
+        else                          { return   }
+    };
+
+And that's it. Your class will inherit all the methods mentioned above,
+and will work according to the specificity logic that you define in your
+_cuts() subroutine.
+
+=head2 Example: a ridiculously specific protease.
+
+Suppose you want to model a protease that only cleaves the sequence
+C<MAEL^VIKP>. Your Protease class would be like this:
+
+    package My::Ridiculously::Specific::Protease;
+    use Moose;
+    extends qw(Bio::ProteaseI);
+
+    augment _cuts => sub {
+        my ( $self, $substrate_ref ) = @_;
+
+        if ( $$substrate_ref eq 'MAELVIKP' ) { return 1 }
+        else                                 { return   }
+    };
+
+    1;
+
+Then you can use your class easily in your application:
+
+    #!/usr/bin/env perl
+    use Modern::Perl;
+
+    use My::Ridiculously::Specific::Protease;
+
+    my $protease = My::Ridiculously::Specific::Protease->new;
+    my @products = $protease->digest( 'AAAAMAELVIKPYYYYYYY' );
+
+    say for @products; # ["AAAAMAEL", "VIKPYYYYYYY"]
 
 =cut
