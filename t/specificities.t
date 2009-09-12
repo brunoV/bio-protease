@@ -5,7 +5,7 @@ use Test::Exception;
 use Test::Warn;
 use YAML::Any;
 
-use ok 'Bio::Protease';
+use_ok( 'Bio::Protease' );
 
 my $test_seq = <<EOL
 mattsfpsmlfyfcifllfhgsmaqlfgqsstpwqssrqgglrgcrfdrlqafeplrqvr

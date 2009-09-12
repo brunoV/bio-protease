@@ -2,7 +2,7 @@ use Modern::Perl;
 use Test::More;
 use Test::Exception;
 
-use ok 'Bio::Protease';
+use_ok( 'Bio::Protease' );
 
 my $enzyme;
 
