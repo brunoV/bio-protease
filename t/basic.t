@@ -1,7 +1,5 @@
 use Modern::Perl;
-
-use lib qw(../lib);
-use Test::More qw(no_plan);
+use Test::More;
 use Test::Exception;
 
 use ok 'Bio::Protease';
@@ -22,3 +20,5 @@ my $pattern = ['AGGAL[^P]'];
 lives_ok { $enzyme = Bio::Protease->new(specificity => $pattern) };
 
 is $enzyme->specificity, 'custom';
+
+done_testing();

@@ -1,7 +1,6 @@
 use Modern::Perl;
 
-use lib qw(/home/brunov/lib/Bio-Protease/lib);
-use Test::More qw(no_plan);
+use Test::More;
 use Test::Exception;
 use Test::Warn;
 use YAML::Any;
@@ -35,7 +34,6 @@ EOL
 ;
 
 $test_seq =~ s/\n//g;
-#say length $test_seq;
 
 open( my $fh, '<', 't/specificities.txt' )
     or die "Couldn't open test data file specificities.txt: $!\n";
@@ -44,6 +42,7 @@ my $true_values = Load $data;
 
 my $results;
 my @products;
+
 foreach my $specificity ( keys %{Bio::Protease->Specificities} ) {
     my $protease = Bio::Protease->new(specificity => $specificity);
     my @cleavage_sites = $protease->cleavage_sites($test_seq);
@@ -52,7 +51,7 @@ foreach my $specificity ( keys %{Bio::Protease->Specificities} ) {
 
 is_deeply($results, $true_values);
 
-# -Test cut
+# Test cut
 my $seq = 'AARAGQTVRFSDAAA';
 my $protease = Bio::Protease->new(specificity => 'trypsin');
 
@@ -69,3 +68,5 @@ $protease = Bio::Protease->new(specificity => 'trypsin');
 @products = $protease->digest($seq);
 
 is_deeply( [@products], ['AAR', 'AGQTVR', 'FSDAAA'] );
+
+done_testing();
