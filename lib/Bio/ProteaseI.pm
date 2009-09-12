@@ -108,8 +108,6 @@ sub DEMOLISH {
     flush_cache('is_substrate');
 }
 
-our $VERSION = '0.01';
-
 __PACKAGE__->meta->make_immutable;
 
 __END__

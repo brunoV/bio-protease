@@ -6,6 +6,8 @@ use namespace::autoclean;
 use Bio::Protease::Types qw(ProteaseRegex ProteaseName);
 extends 'Bio::ProteaseI';
 
+# ABSTRACT: Digest your protein substrates with customizable specificity
+
 class_has Specificities => (
     is      => 'ro',
     isa     => HashRef,
@@ -305,64 +307,10 @@ in this same file.
 =cut
 
 =head1 SEE ALSO
-L<Bio::Tools::SeqPattern>,  L<Bio::Seq>.
 
 PeptideCutter This module's idea is largely based on Expasy's
 PeptideCutter(L<http://www.expasy.ch/tools/peptidecutter/>). For more
 information on the experimental evidence that supports both the
 algorithm and the specificity definitions, check their page.
-
-=head1 AUTHOR
-
-Bruno Vecchi, C<< <vecchi.b at gmail.com> >>
-
-=head1 BUGS
-
-Please report any bugs or feature request via the github issue tracker
-(L<http://github.com/brunoV/bio-protease/issues>).
-
-=cut
-
-#Please report any bugs or feature requests to C<bug-bio-protease at rt.cpan.org>, or through
-#the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Bio-Protease>.  I will be notified, and then you'll
-#automatically be notified of progress on your bug as I make changes.
-
-=head1 SUPPORT
-
-You can find documentation for this module with the perldoc command.
-
-    perldoc Bio::Protease
-
-
-You can also look for information at:
-
-=over 4
-
-=item * RT: CPAN's request tracker
-
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Bio-Protease>
-
-=item * AnnoCPAN: Annotated CPAN documentation
-
-L<http://annocpan.org/dist/Bio-Protease>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/d/Bio-Protease>
-
-=item * Search CPAN
-
-L<http://search.cpan.org/dist/Bio-Protease/>
-
-=back
-
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2009 Bruno Vecchi, all rights reserved.
-
-This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
-
 
 =cut

@@ -1,9 +1,0 @@
-Changes
-MANIFEST
-Makefile.PL
-README.mkd
-lib/Bio/Protease.pm
-t/00-load.t
-t/pod.t
-t/basic.t
-t/specificities.t
