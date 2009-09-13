@@ -1,7 +1,8 @@
 Revision history for Bio::Protease 
 
+1.092550     Sun Sep 13 11:39:41 2009
     - Documentation improvements
     - Substitute "use ok" by "use_ok()" in test suite due to test failures on Solaris
 
-1.092550    Sat Sep 12 00:18:02 2009 -0700
+1.092550     Sat Sep 12 00:18:02 2009
     - Initial release
