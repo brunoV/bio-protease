@@ -8,6 +8,82 @@ extends 'Bio::ProteaseI';
 
 # ABSTRACT: Digest your protein substrates with customizable specificity
 
+sub BUILDARGS {
+    my ($class, %args) = @_;
+
+    $args{_regex} = $args{specificity};
+
+    $class->SUPER::BUILDARGS(%args);
+}
+
+has _regex => (
+    is  => 'ro',
+    isa => ProteaseRegex,
+    coerce => 1,
+);
+
+=attr specificity
+
+Set the enzyme's specificity. Required. Could be either of:
+
+=over 4
+
+=item * an enzyme name: e.g. 'enterokinase'
+
+    my $enzyme = Bio::Protease->new(specificity => 'enterokinase');
+
+There are currently definitions for 36 enzymes/reagents. See
+L<Specificities>.
+
+=item * an array reference of regular expressions:
+
+    my $motif = ['MN[ED]K[^P].{3}'],
+
+    my $enzyme = Bio::Protease->new(specificity => $motif);
+
+The motif should always describe an 8-character long peptide. When a an
+octapeptide matches the regex, its 4th peptidic bond (ie, between the
+4th and 5th letter) will be marked for cleaving or reporting.
+
+For example, the peptide AMQRNLAW is recognized as follows:
+
+    .----..----.----..----. .-----.-----.-----.-----.
+    | A  || M  | Q  || R  |*|  N  |  L  |  A  |  W  |
+    |----||----|----||----|^|-----|-----|-----|-----|
+    | P4 || P3 | P2 || P1 ||| P1' | P2' | P3' | P4' |
+    '----''----'----''----'|'-----'-----'-----'-----'
+                      cleavage site
+
+Some specificity rules can only be described with more than one regular
+expression (See the case for trypsin, for example). To account for those
+cases, the array reference could contain an arbitrary number of regexes,
+all of which should match the given octapeptide.
+
+In the case your particular specificity rule requires an "or" clause,
+you can use the "|" separator in a single regex.
+
+=back
+
+=cut
+
+has specificity => (
+    is  => 'ro',
+    isa => ProteaseName,
+    required => 1,
+    coerce   => 1
+);
+
+augment _cuts => sub {
+    my ($self, $peptide) = @_;
+
+    if ( grep { $$peptide !~ /$_/ } @{$self->_regex} ) {
+        return;
+    }
+
+    return 'yes, it cuts';
+
+};
+
 =attr Specificities
 
 This B<class attribute> contains a hash reference with all the available
@@ -109,82 +185,6 @@ class_has Specificities => (
     isa     => HashRef,
     lazy_build => 1,
 );
-
-sub BUILDARGS {
-    my ($class, %args) = @_;
-
-    $args{_regex} = $args{specificity};
-
-    $class->SUPER::BUILDARGS(%args);
-}
-
-has _regex => (
-    is  => 'ro',
-    isa => ProteaseRegex,
-    coerce => 1,
-);
-
-=attr specificity
-
-Set the enzyme's specificity. Required. Could be either of:
-
-=over 4
-
-=item * an enzyme name: e.g. 'enterokinase'
-
-    my $enzyme = Bio::Protease->new(specificity => 'enterokinase');
-
-There are currently definitions for 36 enzymes/reagents. See
-L<Specificities>.
-
-=item * an array reference of regular expressions:
-
-    my $motif = ['MN[ED]K[^P].{3}'],
-
-    my $enzyme = Bio::Protease->new(specificity => $motif);
-
-The motif should always describe an 8-character long peptide. When a an
-octapeptide matches the regex, its 4th peptidic bond (ie, between the
-4th and 5th letter) will be marked for cleaving or reporting.
-
-For example, the peptide AMQRNLAW is recognized as follows:
-
-    .----..----.----..----. .-----.-----.-----.-----.
-    | A  || M  | Q  || R  |*|  N  |  L  |  A  |  W  |
-    |----||----|----||----|^|-----|-----|-----|-----|
-    | P4 || P3 | P2 || P1 ||| P1' | P2' | P3' | P4' |
-    '----''----'----''----'|'-----'-----'-----'-----'
-                      cleavage site
-
-Some specificity rules can only be described with more than one regular
-expression (See the case for trypsin, for example). To account for those
-cases, the array reference could contain an arbitrary number of regexes,
-all of which should match the given octapeptide.
-
-In the case your particular specificity rule requires an "or" clause,
-you can use the "|" separator in a single regex.
-
-=back
-
-=cut
-
-has specificity => (
-    is  => 'ro',
-    isa => ProteaseName,
-    required => 1,
-    coerce   => 1
-);
-
-augment _cuts => sub {
-    my ($self, $peptide) = @_;
-
-    if ( grep { $$peptide !~ /$_/ } @{$self->_regex} ) {
-        return;
-    }
-
-    return 'yes, it cuts';
-
-};
 
 sub _build_Specificities {
 
