@@ -2,6 +2,35 @@ package Bio::ProteaseI;
 
 # ABSTRACT: A base class to build your customized Protease
 
+=head1 SYNOPSIS
+
+    package My::Protease;
+    use Moose;
+    extends qw(Bio::ProteaseI);
+
+    augment _cuts => sub {
+        my ($self, $substrate) = @_;
+
+        # some code that decides
+        # if $peptide should be cut or not
+
+        if ( $peptide_should_be_cut ) { return 1 }
+        else                          { return   }
+    };
+
+=head1 DESCRIPTION
+
+This module describes the interface for L<Bio::Protease>. You only need
+to use this if you want to build your custom specificity protease and
+regular expressions won't do; otherwise look at L<Bio::Protease>
+instead.
+
+All of the methods provided in Bio::Protease are defined here,
+incluiding a stub of the specificity-determining one, C<_cuts>. It has
+to be completed by the subclass with an C<augment> call.
+
+=cut
+
 use Moose;
 use Carp;
 use Memoize qw(memoize flush_cache);
@@ -10,6 +39,16 @@ use namespace::autoclean;
 memoize ('cleavage_sites');
 memoize ('is_substrate');
 memoize ('digest');
+
+=method cut
+
+Attempt to cleave $peptide at the C-terminal end of the $i-th residue
+(ie, at the right). If the bond is indeed cleavable (determined by the
+enzyme's specificity), then a list with the two products of the
+hydrolysis will be returned. Otherwise, returns false.
+
+    my @products = $enzyme->cut($peptide, $i);
+=cut
 
 sub cut {
     my ( $self, $substrate, $pos ) = @_;
@@ -38,6 +77,16 @@ sub cut {
     else { return }
 }
 
+=method digest
+
+Performs a complete digestion of the peptide argument, returning a list
+with possible products. It does not do partial digests (see method
+C<cut> for that).
+
+    my @products = $enzyme->digest($protein);
+
+=cut
+
 sub digest {
     my ( $self, $substrate ) = @_;
     $substrate = uc $substrate;
@@ -60,6 +109,17 @@ sub digest {
 
     return @products;
 }
+
+=method is_substrate
+
+Returns true or false whether the peptide argument is a substrate or
+not. Esentially, it's equivalent to calling L<cleavage_sites> in scalar
+context, but with the difference that this method short-circuits when it
+finds its first cleavable site. Thus, it's useful for CPU-intensive
+tasks where the only information required is whether a polypeptide is or
+not a substrate of a particular enzyme.
+
+=cut
 
 sub is_substrate {
     my ($self, $substrate) = @_;
@@ -91,6 +151,17 @@ sub _cuts {
 
 }
 
+=method cleavage_sites
+
+Returns a list with siscile bonds (bonds susceptible to be cleaved as
+determined by the enzyme's specificity). Bonds are numbered starting
+from 1, from N to C-terminal. Takes a string with the protein sequence
+as an argument:
+
+    my @sites = $enzyme->cleavage_sites($peptide);
+
+=cut
+
 sub cleavage_sites {
     my ( $self, $substrate ) = @_;
     $substrate = uc $substrate;
@@ -112,36 +183,6 @@ sub DEMOLISH {
 }
 
 __PACKAGE__->meta->make_immutable;
-
-=head1 SYNOPSIS
-
-    package My::Protease;
-    use Moose;
-    extends qw(Bio::ProteaseI);
-
-    augment _cuts => sub {
-        my ($self, $substrate) = @_;
-
-        # some code that decides
-        # if $peptide should be cut or not
-
-        if ( $peptide_should_be_cut ) { return 1 }
-        else                          { return   }
-    };
-
-=head1 DESCRIPTION
-
-This module describes the interface for L<Bio::Protease>. You only need
-to use this if you want to build your custom specificity protease and
-regular expressions won't do; otherwise look at L<Bio::Protease>
-instead.
-
-=head1 METHODS
-
-All of the methods provided in Bio::Protease (namely, C<cut>, C<digest>,
-C<is_substrate> and C<cleavage_sites>) are defined here, incluiding a
-stub of the specificity-determining one, C<_cuts>. It has to be
-completed by the subclass with an C<augment> call.
 
 =head1 HOW TO SUBCLASS
 
@@ -185,7 +226,7 @@ And that's it. Your class will inherit all the methods mentioned above,
 and will work according to the specificity logic that you define in your
 C<_cuts()> subroutine.
 
-=head2 Example: a ridiculously specific protease.
+=head2 Example: a ridiculously specific protease
 
 Suppose you want to model a protease that only cleaves the sequence
 C<MAEL^VIKP>. Your Protease class would be like this:
@@ -215,4 +256,10 @@ Then you can use your class easily in your application:
 
     say for @products; # ["AAAAMAEL", "VIKPYYYYYYY"]
 
+Of course, this specificity model is too simple to deserve subclassing,
+as it could be perfectly defined by a regex and passed to the
+C<specificity> attribute of L<Bio::Protease>. It's only used here to
+serve as an example.
+
 =cut
+
