@@ -94,10 +94,6 @@ sub _build_Specificities {
 
 __PACKAGE__->meta->make_immutable;
 
-__END__
-
-=pod
-
 =head1 SYNOPSIS
 
     use Bio::Protease;

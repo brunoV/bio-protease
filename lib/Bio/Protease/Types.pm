@@ -1,4 +1,7 @@
 package Bio::Protease::Types;
+
+# ABSTRACT: Specific types for Bio::Protease
+
 use MooseX::Types::Moose qw(Str ArrayRef);
 use MooseX::Types -declare => [qw(ProteaseName ProteaseRegex)];
 use namespace::autoclean;
@@ -24,14 +27,6 @@ sub _str_to_prot_regex {
 }
 
 __PACKAGE__->meta->make_immutable;
-
-__END__
-
-=pod
-
-=head1 NAME
-
-Bio::Protease::Types - Specific types for Bio::Protease
 
 =head1 DESCRIPTION
 

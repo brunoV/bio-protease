@@ -1,4 +1,7 @@
 package Bio::ProteaseI;
+
+# ABSTRACT: A base class to build your customized Protease
+
 use Moose;
 use Carp;
 use Memoize qw(memoize flush_cache);
@@ -109,14 +112,6 @@ sub DEMOLISH {
 }
 
 __PACKAGE__->meta->make_immutable;
-
-__END__
-
-=pod
-
-=head1 NAME
-
-Bio::ProteaseI - A base class to build your customized Protease
 
 =head1 SYNOPSIS
 
