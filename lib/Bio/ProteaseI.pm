@@ -199,10 +199,10 @@ interfase using C<extends>.
 
 =head2 Step 2: augment _cuts()
 
-The C<_cuts> subroutine will be used by the methods C<digest>, C<cut>,
+The C<_cuts> method will be used by the methods C<digest>, C<cut>,
 C<cleavage_sites> and C<is_substrate>. It will B<always> be passed a
-reference to a string of 8 characters; if the subroutine returns true,
-then the peptide bond between the 4th and 5th residues will be marked as
+reference to a string of 8 characters; if the method returns true, then
+the peptide bond between the 4th and 5th residues will be marked as
 siscile, and the appropiate action will be performed depending on which
 method was called.
 
@@ -224,7 +224,7 @@ L<Moose::Manual::MethodModifiers>), like so:
 
 And that's it. Your class will inherit all the methods mentioned above,
 and will work according to the specificity logic that you define in your
-C<_cuts()> subroutine.
+C<_cuts()> method.
 
 =head2 Example: a ridiculously specific protease
 
