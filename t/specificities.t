@@ -4,6 +4,7 @@ use Test::More;
 use Test::Exception;
 use Test::Warn;
 use YAML::Any;
+use autodie;
 
 use_ok( 'Bio::Protease' );
 
@@ -35,8 +36,7 @@ EOL
 
 $test_seq =~ s/\n//g;
 
-open( my $fh, '<', 't/specificities.txt' )
-    or die "Couldn't open test data file specificities.txt: $!\n";
+open( my $fh, '<', 't/specificities.yaml' );
 my $data = join('', <$fh>);
 my $true_values = Load $data;
 
