@@ -312,7 +312,7 @@ as an argument:
 =method is_substrate
 
 Returns true or false whether the peptide argument is a substrate or
-not. Esentially, it's equivalent to calling L<cleavage_sites> in boolean
+not. Esentially, it's equivalent to calling C<cleavage_sites> in boolean
 context, but with the difference that this method short-circuits when it
 finds its first cleavable site. Thus, it's useful for CPU-intensive
 tasks where the only information required is whether a polypeptide is or
