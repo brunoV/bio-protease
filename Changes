@@ -1,6 +1,13 @@
 Revision history for Bio::Protease 
 
-1.092550     Sun Sep 13 11:39:41 2009
+1.092670     Mon Sep 14 10:16:12 2009
+    - remove three final stops in the specificities.yaml file that made Load fail when YAML.pm was used
+    - use autodie. This is 2009.
+    - doc fix: _cuts() is a method rather than a subroutine
+    - fixed broken link in docs
+    - factual mistkae in the is_substrate() docs: it's boolean, not scalar context
+
+1.092560     Sun Sep 13 11:39:41 2009
     - Documentation improvements
     - Substitute "use ok" by "use_ok()" in test suite due to test failures on Solaris
 
