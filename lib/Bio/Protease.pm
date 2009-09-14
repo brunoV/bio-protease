@@ -262,8 +262,8 @@ __PACKAGE__->meta->make_immutable;
 =head1 WARNING: ALPHA CODE
 
 This module is still in its infancy, and I might change its interface in
-the future (although I'm not planning to). Use it at your own discretion
-(but please do, and send feedback!).
+the future (although I'm not planning to). Use it at your own risk (but
+please do, and send feedback!).
 
 =head1 DESCRIPTION
 
@@ -315,8 +315,8 @@ Returns true or false whether the peptide argument is a substrate or
 not. Esentially, it's equivalent to calling C<cleavage_sites> in boolean
 context, but with the difference that this method short-circuits when it
 finds its first cleavable site. Thus, it's useful for CPU-intensive
-tasks where the only information required is whether a polypeptide is or
-not a substrate of a particular enzyme.
+tasks where the only information required is whether a polypeptide is a
+substrate of a particular enzyme or not 
 
 =cut
 

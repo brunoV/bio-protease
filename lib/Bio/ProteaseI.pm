@@ -116,8 +116,8 @@ Returns true or false whether the peptide argument is a substrate or
 not. Esentially, it's equivalent to calling C<cleavage_sites> in boolean
 context, but with the difference that this method short-circuits when it
 finds its first cleavable site. Thus, it's useful for CPU-intensive
-tasks where the only information required is whether a polypeptide is or
-not a substrate of a particular enzyme.
+tasks where the only information required is whether a polypeptide is a
+substrate of a particular enzyme or not 
 
 =cut
 
@@ -258,8 +258,8 @@ Then you can use your class easily in your application:
 
 Of course, this specificity model is too simple to deserve subclassing,
 as it could be perfectly defined by a regex and passed to the
-C<specificity> attribute of L<Bio::Protease>. It's only used here to
-serve as an example.
+C<specificity> attribute of L<Bio::Protease>. It's only used here as an
+example.
 
 =cut
 
