@@ -42,9 +42,9 @@ memoize ('digest');
 
 =method cut
 
-Attempt to cleave $peptide at the C-terminal end of the $i-th residue
-(ie, at the right). If the bond is indeed cleavable (determined by the
-enzyme's specificity), then a list with the two products of the
+Attempt to cleave C<$peptide> at the C-terminal end of the C<$i>-th
+residue (ie, at the right). If the bond is indeed cleavable (determined
+by the enzyme's specificity), then a list with the two products of the
 hydrolysis will be returned. Otherwise, returns false.
 
     my @products = $enzyme->cut($peptide, $i);
