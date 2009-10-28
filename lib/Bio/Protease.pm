@@ -279,7 +279,8 @@ However, the module is flexible enough to allow the inclusion of any of
 these effects by subclassing from the module's interface,
 L<Bio::ProteaseI>. Alternatively, if your desired specificity can be
 correctly described by a regular expression, you can pass it as a string
-the specificity attribute at construction time. See L<specificity> below.
+to the specificity attribute at construction time. See L<specificity>
+below.
 
 =cut
 
