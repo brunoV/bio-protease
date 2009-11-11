@@ -4,7 +4,7 @@ use MooseX::ClassAttribute;
 use MooseX::Types::Moose qw(HashRef);
 use namespace::autoclean;
 use Bio::Protease::Types qw(ProteaseRegex ProteaseName);
-extends 'Bio::ProteaseI';
+with 'Bio::ProteaseI';
 
 # ABSTRACT: Digest your protein substrates with customizable specificity
 
@@ -73,7 +73,7 @@ has specificity => (
     coerce   => 1
 );
 
-augment _cuts => sub {
+sub _cuts {
     my ($self, $peptide) = @_;
 
     if ( grep { $$peptide !~ /$_/ } @{$self->_regex} ) {

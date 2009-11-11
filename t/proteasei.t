@@ -4,9 +4,9 @@ use Modern::Perl;
 {
     package My::Protease;
     use Moose;
-    extends qw(Bio::ProteaseI);
+    with qw(Bio::ProteaseI);
 
-    augment _cuts => sub {
+    sub _cuts {
         my ( $self, $subs_ref ) = @_;
 
         if ( $$subs_ref eq 'MAELVIKP' ) { return 1 }

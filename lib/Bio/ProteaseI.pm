@@ -1,14 +1,14 @@
 package Bio::ProteaseI;
 
-# ABSTRACT: A base class to build your customized Protease
+# ABSTRACT: A role to build your customized Protease
 
 =head1 SYNOPSIS
 
     package My::Protease;
     use Moose;
-    extends qw(Bio::ProteaseI);
+    with 'Bio::ProteaseI';
 
-    augment _cuts => sub {
+    sub _cuts {
         my ($self, $substrate) = @_;
 
         # some code that decides
@@ -31,7 +31,7 @@ to be completed by the subclass with an C<augment> call.
 
 =cut
 
-use Moose;
+use Moose::Role;
 use Carp;
 use Memoize qw(memoize flush_cache);
 use namespace::autoclean;
@@ -39,6 +39,8 @@ use namespace::autoclean;
 memoize ('cleavage_sites');
 memoize ('is_substrate');
 memoize ('digest');
+
+requires '_cuts';
 
 =method cut
 
@@ -131,14 +133,9 @@ sub is_substrate {
     return;
 }
 
-sub _cuts {
+around _cuts => sub {
 
-    # Substrate needs to be passed by reference in order to modify the
-    # argument for the inner() call. Otherwise, all modifications to
-    # $substrate would only be local to this sub, and a fresh unmodified
-    # copy would be given to inner(), giving unwanted results.
-
-    my ($self, $substrate) = @_;
+    my ($orig, $self, $substrate) = @_;
     my $length = length $$substrate;
     if ( $length < 8 ) {
         if ( $length > 4 ) {
@@ -147,9 +144,9 @@ sub _cuts {
         else { return }
     }
 
-    inner();
+    $self->$orig($substrate);
 
-}
+};
 
 =method cleavage_sites
 
@@ -182,7 +179,7 @@ sub DEMOLISH {
     flush_cache('is_substrate');
 }
 
-__PACKAGE__->meta->make_immutable;
+1;
 
 =head1 HOW TO SUBCLASS
 
@@ -190,7 +187,7 @@ __PACKAGE__->meta->make_immutable;
 
     package My::Protease;
     use Moose;
-    extends qw(Bio::ProteaseI);
+    with 'Bio::ProteaseI';
 
     1;
 
