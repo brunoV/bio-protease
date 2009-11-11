@@ -1,10 +1,11 @@
 Revision history for Bio::Protease
 
-1.093150     Wed Nov 11 10:32:33 2009
+1.093151     Wed Nov 11 10:32:33 2009
 
     - Interface is now implemented as a role instead of a base class.
     - Instead of a scalar reference, _cuts is passed a plain scalar.
     - Various doc improvements.
+    - Use PodWeaver
 
 1.092670     Mon Sep 14 10:16:12 2009
 
