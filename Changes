@@ -1,15 +1,26 @@
-Revision history for Bio::Protease 
+Revision history for Bio::Protease
+
+1.093150     Wed Nov 11 10:32:33 2009
+
+    - Interface is now implemented as a role instead of a base class.
+    - Instead of a scalar reference, _cuts is passed a plain scalar.
+    - Various doc improvements.
 
 1.092670     Mon Sep 14 10:16:12 2009
-    - remove three final stops in the specificities.yaml file that made Load fail when YAML.pm was used
-    - use autodie. This is 2009.
-    - doc fix: _cuts() is a method rather than a subroutine
-    - fixed broken link in docs
-    - factual mistkae in the is_substrate() docs: it's boolean, not scalar context
+
+    - remove three final stops in the specificities.yaml file that made
+      Load fail when YAML.pm was used.
+    - Use autodie. This is 2009.
+    - Doc fix: _cuts() is a method rather than a subroutine.
+    - Fixed broken link in docs.
+    - Factual mistkae in the is_substrate() docs: it's boolean, not
+      scalar context.
 
 1.092560     Sun Sep 13 11:39:41 2009
-    - Documentation improvements
-    - Substitute "use ok" by "use_ok()" in test suite due to test failures on Solaris
+    - Documentation improvements.
+    - Substitute "use ok" by "use_ok()" in test suite due to test
+      failures on Solaris.
 
 1.092550     Sat Sep 12 00:18:02 2009
-    - Initial release
+    - Initial release.
+
