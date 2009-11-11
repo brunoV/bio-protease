@@ -67,7 +67,7 @@ sub cut {
 
     my $pep = substr($substrate, $pos - 4, 8);
 
-    if ( $self->_cuts(\$pep) ) {
+    if ( $self->_cuts($pep) ) {
         my $product = substr($substrate, 0, $pos);
         substr($substrate, 0, $pos) = '';
 
@@ -97,7 +97,7 @@ sub digest {
 
     $substrate = 'XXX' . $substrate;
     while ( my $pep = substr($substrate, $i, 8) ) {
-        if ( $self->_cuts( \$pep ) ) {
+        if ( $self->_cuts($pep) ) {
             my $product = substr($substrate, $j, $i + 4 - $j);
             push @products, $product;
 
@@ -136,10 +136,10 @@ sub is_substrate {
 around _cuts => sub {
 
     my ($orig, $self, $substrate) = @_;
-    my $length = length $$substrate;
+    my $length = length $substrate;
     if ( $length < 8 ) {
         if ( $length > 4 ) {
-            $$substrate .= 'X' x (8 - $length);
+            $substrate .= 'X' x (8 - $length);
         }
         else { return }
     }
@@ -167,7 +167,7 @@ sub cleavage_sites {
 
     $substrate = 'XXX' . $substrate;
     while ( my $pep = substr($substrate, $i-1, 8 ) ) {
-        if ( $self->_cuts( \$pep ) ) { push @sites, $i };
+        if ( $self->_cuts( $pep ) ) { push @sites, $i };
         ++$i;
     }
     return @sites;

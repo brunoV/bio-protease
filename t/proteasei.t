@@ -7,9 +7,9 @@ use Modern::Perl;
     with qw(Bio::ProteaseI);
 
     sub _cuts {
-        my ( $self, $subs_ref ) = @_;
+        my ( $self, $substrate ) = @_;
 
-        if ( $$subs_ref eq 'MAELVIKP' ) { return 1 }
+        if ( $substrate eq 'MAELVIKP' ) { return 1 }
         else                            { return   }
     };
 

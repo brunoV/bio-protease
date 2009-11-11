@@ -76,7 +76,7 @@ has specificity => (
 sub _cuts {
     my ($self, $peptide) = @_;
 
-    if ( grep { $$peptide !~ /$_/ } @{$self->_regex} ) {
+    if ( grep { $peptide !~ /$_/ } @{$self->_regex} ) {
         return;
     }
 
