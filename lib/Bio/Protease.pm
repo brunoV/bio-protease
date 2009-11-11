@@ -276,11 +276,10 @@ This models are somewhat simplistic as they are largely regex-based, and
 do not take into account subtleties such as kinetic/temperature effects,
 accessible solvent area, secondary or tertiary structure elements.
 However, the module is flexible enough to allow the inclusion of any of
-these effects by subclassing from the module's interface,
-L<Bio::ProteaseI>. Alternatively, if your desired specificity can be
-correctly described by a regular expression, you can pass it as a string
-to the specificity attribute at construction time. See L<specificity>
-below.
+these effects by consuming the module's interface, L<Bio::ProteaseI>.
+Alternatively, if your desired specificity can be correctly described by
+a regular expression, you can pass it as a string to the specificity
+attribute at construction time. See L<specificity> below.
 
 =cut
 

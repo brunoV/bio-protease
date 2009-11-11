@@ -25,9 +25,8 @@ to use this if you want to build your custom specificity protease and
 regular expressions won't do; otherwise look at L<Bio::Protease>
 instead.
 
-All of the methods provided in Bio::Protease are defined here,
-incluiding a stub of the specificity-determining one, C<_cuts>. It has
-to be completed by the subclass with an C<augment> call.
+All of the methods provided in L<Bio::Protease> are defined here.
+The consuming class just has to implement a C<_cuts> method.
 
 =cut
 
@@ -181,9 +180,9 @@ sub DEMOLISH {
 
 1;
 
-=head1 HOW TO SUBCLASS
+=head1 How to implement your own Protease class.
 
-=head2 Step 1: create a child class.
+=head2 Step 1: create a class that does ProteaseI.
 
     package My::Protease;
     use Moose;
@@ -191,25 +190,24 @@ sub DEMOLISH {
 
     1;
 
-Simply create a new Moose class, and inherit from the Bio::ProteaseI
-interfase using C<extends>.
+Simply create a new Moose class, and consume the L<Bio::ProteaseI>
+role.
 
-=head2 Step 2: augment _cuts()
+=head2 Step 2: Implement a _cuts() method.
 
 The C<_cuts> method will be used by the methods C<digest>, C<cut>,
 C<cleavage_sites> and C<is_substrate>. It will B<always> be passed a
-reference to a string of 8 characters; if the method returns true, then
-the peptide bond between the 4th and 5th residues will be marked as
-siscile, and the appropiate action will be performed depending on which
-method was called.
+string of 8 characters; if the method returns true, then the peptide
+bond between the 4th and 5th residues will be marked as siscile, and the
+appropiate action will be performed depending on which method was
+called.
 
 Your specificity logic should only be concerned in deciding whether the
 8-residue long peptide passed to it as an argument should be cut between
-the 4th and 5th residues. This is done by using the C<augment> method
-modifier (for more information on Method Modifiers, please read up on
-L<Moose::Manual::MethodModifiers>), like so:
+the 4th and 5th residues. This is done in the private C<_cuts> method,
+like so:
 
-    augment _cuts => sub {
+    sub _cuts {
         my ( $self, $peptide ) = @_;
 
         # some code that decides
@@ -219,9 +217,9 @@ L<Moose::Manual::MethodModifiers>), like so:
         else                          { return   }
     };
 
-And that's it. Your class will inherit all the methods mentioned above,
-and will work according to the specificity logic that you define in your
-C<_cuts()> method.
+And that's it. Your class will be composed with all the methods
+mentioned above, and will work according to the specificity logic that
+you define in your C<_cuts()> method.
 
 =head2 Example: a ridiculously specific protease
 
@@ -230,13 +228,13 @@ C<MAEL^VIKP>. Your Protease class would be like this:
 
     package My::Ridiculously::Specific::Protease;
     use Moose;
-    extends qw(Bio::ProteaseI);
+    with 'Bio::ProteaseI';
 
-    augment _cuts => sub {
-        my ( $self, $substrate_ref ) = @_;
+    sub _cuts {
+        my ( $self, $substrate ) = @_;
 
-        if ( $$substrate_ref eq 'MAELVIKP' ) { return 1 }
-        else                                 { return   }
+        if ( $substrate eq 'MAELVIKP' ) { return 1 }
+        else                            { return   }
     };
 
     1;
@@ -253,7 +251,7 @@ Then you can use your class easily in your application:
 
     say for @products; # ["AAAAMAEL", "VIKPYYYYYYY"]
 
-Of course, this specificity model is too simple to deserve subclassing,
+Of course, this specificity model is too simple to deserve a new class,
 as it could be perfectly defined by a regex and passed to the
 C<specificity> attribute of L<Bio::Protease>. It's only used here as an
 example.
