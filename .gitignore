@@ -10,3 +10,4 @@ cover_db
 nytprof/
 .prove
 Bio-Protease-*/
+.build

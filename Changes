@@ -1,4 +1,6 @@
-Revision history for Bio::Protease
+Revision history for {{$dist->name}}
+
+{{$NEXT}}
 
 
 1.093151     Wed Nov 11 11:57:55 2009
