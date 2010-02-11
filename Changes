@@ -2,6 +2,9 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+    - Rely on YAML instead of YAML::Any
+    - bump Moose and ClassAttribute prerequisites
+    - improve kwalitee
 
 1.093151     Wed Nov 11 11:57:55 2009
 
@@ -27,4 +30,3 @@ Revision history for {{$dist->name}}
 
 1.092550     Sat Sep 12 00:18:02 2009
     - Initial release.
-
