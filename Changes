@@ -2,6 +2,9 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+    - Some internal refactorings, no functional changes.
+    - Remove alpha warning.
+
 1.100420  2010-02-10 23:39:36 America/Argentina/Buenos_Aires
 
     - Rely on YAML instead of YAML::Any
