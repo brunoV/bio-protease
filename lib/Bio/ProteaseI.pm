@@ -92,21 +92,20 @@ sub digest {
     my ( $self, $substrate ) = @_;
     $substrate = uc $substrate;
     my @products;
-    my ($i, $j) = (0, 0);
 
-    $substrate = 'XXX' . $substrate;
-    while ( my $pep = substr($substrate, $i, 8) ) {
-        if ( $self->_cuts($pep) ) {
-            my $product = substr($substrate, $j, $i + 4 - $j);
-            push @products, $product;
+    # Get the positions where the enzyme cuts
+    my @sites = $self->cleavage_sites($substrate);
 
-            $j = $i + 4;
-        }
-        $i++;
+    my $start = 0;
+    while ( my $site = shift @sites ) {
+        my $length = $site - $start;
+        my $product = substr($substrate, $start, $length);
+        push @products, $product;
+        $start += $length;
     }
-    push @products, substr($substrate, $j - length($substrate));
 
-    s/X//g for @products[0, -1];
+    # Last peptide: cut from last position to the end.
+    push @products, substr($substrate, $start);
 
     return @products;
 }
