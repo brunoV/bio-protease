@@ -94,6 +94,7 @@ sub digest {
     # Get the positions where the enzyme cuts
     my @sites = $self->cleavage_sites($substrate);
 
+    # Get the peptide products;
     my @products;
     my $start = 0;
     while ( my $site = shift @sites ) {
