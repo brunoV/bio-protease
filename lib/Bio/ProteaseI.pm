@@ -90,11 +90,11 @@ C<cut> for that).
 
 sub digest {
     my ( $self, $substrate ) = @_;
-    my @products;
 
     # Get the positions where the enzyme cuts
     my @sites = $self->cleavage_sites($substrate);
 
+    my @products;
     my $start = 0;
     while ( my $site = shift @sites ) {
         my $length = $site - $start;
