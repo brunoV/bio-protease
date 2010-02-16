@@ -90,7 +90,6 @@ C<cut> for that).
 
 sub digest {
     my ( $self, $substrate ) = @_;
-    $substrate = uc $substrate;
     my @products;
 
     # Get the positions where the enzyme cuts
