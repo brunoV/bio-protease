@@ -259,12 +259,6 @@ __PACKAGE__->meta->make_immutable;
 
 =cut
 
-=head1 WARNING: ALPHA CODE
-
-This module is still in its infancy, and I might change its interface in
-the future (although I'm not planning to). Use it at your own risk (but
-please do, and send feedback!).
-
 =head1 DESCRIPTION
 
 This module models the hydrolitic behaviour of a proteolytic enzyme.
