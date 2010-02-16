@@ -61,7 +61,7 @@ sub cut {
     }
 
     $substrate = uc $substrate;
-    $substrate = 'XXX'. $substrate;
+    $substrate = _cap_head($substrate);
     $pos += 3;
 
     my $pep = substr($substrate, $pos - 4, 8);
@@ -70,7 +70,7 @@ sub cut {
         my $product = substr($substrate, 0, $pos);
         substr($substrate, 0, $pos) = '';
 
-        s/X//g for ($product, $substrate);
+        _uncap($product, $substrate);
 
         return ($product, $substrate);
     }
@@ -134,6 +134,15 @@ sub is_substrate {
 around _cuts => sub {
 
     my ($orig, $self, $substrate) = @_;
+
+    $substrate = _cap_tail($substrate) or return;
+
+    $self->$orig($substrate);
+};
+
+sub _cap_tail {
+    my $substrate = shift;
+
     my $length = length $substrate;
     if ( $length < 8 ) {
         if ( $length > 4 ) {
@@ -142,9 +151,13 @@ around _cuts => sub {
         else { return }
     }
 
-    $self->$orig($substrate);
+    return $substrate;
+}
 
-};
+sub _cap_head { return 'XXX' . shift }
+
+sub _uncap { s/X//g for @_ }
+
 
 =method cleavage_sites
 
@@ -163,7 +176,7 @@ sub cleavage_sites {
     my @sites;
     my $i = 1;
 
-    $substrate = 'XXX' . $substrate;
+    $substrate = _cap_head($substrate);
     while ( my $pep = substr($substrate, $i-1, 8 ) ) {
         if ( $self->_cuts( $pep ) ) { push @sites, $i };
         ++$i;
