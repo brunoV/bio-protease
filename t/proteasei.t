@@ -26,6 +26,7 @@ my $seq = 'AAAAMAELVIKPYYYYYYY';
 
 ok $protease->cut($seq, 8), 'Cut works';
 dies_ok { $protease->cut            } qr/Incorrect substrate/;
+dies_ok { $protease->cut(42)        } qr/Incorrect substrate/;
 dies_ok { $protease->cut('foo')     } qr/Incorrect position/;
 dies_ok { $protease->cut('foo', 42) } qr/Incorrect position/;
 dies_ok { $protease->cut('foo', -1) } qr/Incorrect position/;
