@@ -2,6 +2,9 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+    - Methods now die when given no/senseless arguments
+    - Test corner cases more thoroughly: 100% coverage reached \o/
+
 1.100470  2010-02-16 12:04:34 America/Argentina/Buenos_Aires
 
     - Some internal refactorings, no functional changes.
