@@ -31,7 +31,7 @@ __PACKAGE__->meta->make_immutable;
 =head1 DESCRIPTION
 
 This module defines specific types and type coercions to be used by
-Bio::Protease. It should not be used by end users, nor is necessary to
-subclass from Bio::ProteaseI.
+L<Bio::Protease>. It should not be used by end users or consumer of the
+Bio::ProteaseI role.
 
 =cut
