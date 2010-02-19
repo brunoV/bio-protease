@@ -60,7 +60,6 @@ sub cut {
     unless ( defined $pos and $pos > 0 and $pos <= length $substrate ) {
 
         croak "Incorrect position.";
-        return;
     }
 
     $substrate = uc $substrate;
