@@ -2,7 +2,6 @@ use Modern::Perl;
 
 use Test::More;
 use Test::Exception;
-use Test::Warn;
 use YAML::Any;
 use autodie;
 
@@ -54,9 +53,6 @@ is_deeply($results, $true_values);
 # Test cut
 my $seq = 'AARAGQTVRFSDAAA';
 my $protease = Bio::Protease->new(specificity => 'trypsin');
-
-warning_like { !$protease->cut($seq)      } qr/Incorrect position/;
-warning_like { !$protease->cut($seq, 100) } qr/Incorrect position/;
 
 ok !$protease->cut($seq, 1);
 

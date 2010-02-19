@@ -31,7 +31,7 @@ The consuming class just has to implement a C<_cuts> method.
 =cut
 
 use Moose::Role;
-use Carp;
+use Carp 'croak';
 use Memoize qw(memoize flush_cache);
 use namespace::autoclean;
 
@@ -54,9 +54,12 @@ hydrolysis will be returned. Otherwise, returns false.
 sub cut {
     my ( $self, $substrate, $pos ) = @_;
 
+    croak "Incorrect substrate argument"
+        unless ( defined $substrate and _looks_like_string($substrate) );
+
     unless ( defined $pos and $pos > 0 and $pos <= length $substrate ) {
 
-        carp "Incorrect position.";
+        croak "Incorrect position.";
         return;
     }
 
@@ -91,8 +94,11 @@ C<cut> for that).
 sub digest {
     my ( $self, $substrate ) = @_;
 
+    croak "Incorrect substrate argument"
+        unless ( defined $substrate and _looks_like_string($substrate) );
+
     # Get the positions where the enzyme cuts
-    my @sites = $self->cleavage_sites($substrate);
+    my @sites = $self->cleavage_sites($substrate) or return $substrate;
 
     # Get the peptide products;
     my @products;
@@ -123,6 +129,9 @@ substrate of a particular enzyme or not
 
 sub is_substrate {
     my ($self, $substrate) = @_;
+
+    croak "Incorrect substrate argument"
+        unless ( defined $substrate and _looks_like_string($substrate) );
 
     for my $pos (1 .. length $substrate) {
         return 1 if $self->cut($substrate, $pos);
@@ -158,6 +167,8 @@ sub _cap_head { return 'XXX' . shift }
 
 sub _uncap { s/X//g for @_ }
 
+sub _looks_like_string { $_[0] ~~ /[a-z]+/i }
+
 
 =method cleavage_sites
 
@@ -172,6 +183,10 @@ as an argument:
 
 sub cleavage_sites {
     my ( $self, $substrate ) = @_;
+
+    croak "Incorrect substrate argument"
+        unless ( defined $substrate and _looks_like_string($substrate) );
+
     $substrate = uc $substrate;
     my @sites;
     my $i = 1;
