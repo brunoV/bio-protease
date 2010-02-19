@@ -8,17 +8,10 @@ with 'Bio::ProteaseI';
 
 # ABSTRACT: Digest your protein substrates with customizable specificity
 
-sub BUILDARGS {
-    my ($class, %args) = @_;
-
-    $args{_regex} = $args{specificity};
-
-    $class->SUPER::BUILDARGS(%args);
-}
-
 has _regex => (
     is  => 'ro',
     isa => ProteaseRegex,
+    init_arg => 'specificity',
     coerce => 1,
 );
 
