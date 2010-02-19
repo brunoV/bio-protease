@@ -19,6 +19,10 @@ my $protease = My::Protease->new;
 
 isa_ok( $protease, 'My::Protease' );
 
+can_ok( $protease, qw(cut is_substrate digest cleavage_sites) );
+
+ok !$protease->cut('foo', -1), "no cutting in senseless positions";
+
 my @products = $protease->digest( 'AAAAMAELVIKPYYYYYYY' );
 
 is_deeply(
