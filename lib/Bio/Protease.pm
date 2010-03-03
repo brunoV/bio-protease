@@ -25,7 +25,7 @@ Set the enzyme's specificity. Required. Could be either of:
 
     my $enzyme = Bio::Protease->new(specificity => 'enterokinase');
 
-There are currently definitions for 36 enzymes/reagents. See
+There are currently definitions for 37 enzymes/reagents. See
 L<Specificities>.
 
 =item * a regular expression:
@@ -265,7 +265,7 @@ This module models the hydrolitic behaviour of a proteolytic enzyme.
 Its main purpose is to predict the outcome of hydrolitic cleavage of a
 peptidic substrate.
 
-The enzyme specificity is currently modeled for 36 enzymes/reagents.
+The enzyme specificity is currently modeled for 37 enzymes/reagents.
 This models are somewhat simplistic as they are largely regex-based, and
 do not take into account subtleties such as kinetic/temperature effects,
 accessible solvent area, secondary or tertiary structure elements.
