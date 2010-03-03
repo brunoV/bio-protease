@@ -2,6 +2,8 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+    - Added specificity: alcalase
+    - Fix bug were passing a regexp to specificity wouldn't work
     - Methods now die when given no/senseless arguments
     - Test corner cases more thoroughly: 100% coverage reached \o/
 
@@ -38,5 +40,5 @@ Revision history for {{$dist->name}}
     - Substitute "use ok" by "use_ok()" in test suite due to test
       failures on Solaris.
 
-1.092550     Sat Sep 12 00:18:02 2009
-    - Initial release.
+
+
