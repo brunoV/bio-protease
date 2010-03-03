@@ -8,15 +8,17 @@ This module models the hydrolitic behaviour of a proteolytic enzyme.
 Its main purpose is to predict the outcome of hydrolitic cleavage of a
 peptidic substrate.
 
-The enzyme specificity is currently modeled for 32 enzymes/reagents.
+The enzyme specificity is currently modeled for 33 enzymes/reagents.
 This models are somewhat simplistic as they are largely regex-based, and
 do not take into account subtleties such as kinetic/temperature effects,
 accessible solvent area, secondary or tertiary structure elements.
 However, the module is flexible enough to allow the inclusion of any of
-these effects via user-defined regexes or by subclassing.
+these effects via user-defined regexes or by consuming the ProteaseI
+role.
 
 ### Currently implemented specificities:
 
+* Alcalase
 * Arg-c Proteinase
 * asp-n Endopeptidase
 * asp-n Endopeptidase Glu
@@ -57,8 +59,8 @@ these effects via user-defined regexes or by subclassing.
 
 ### Support for custom specificities
 
-You can customize your protease's specificity either subclassing
-Bio::ProteaseI, or using a custom regex in the **specificity**
+You can customize your protease's specificity either consuming the
+Bio::ProteaseI role, or using a custom regex in the **specificity**
 attribute. The underlying model allows for up to 8 residues surrounding
 the siscile bond (P4-P1, P1'-P4'):
 
@@ -87,7 +89,7 @@ perldoc command.
 
 ### Copyright and Licence
 
-Copyright (C) 2009 **Bruno Vecchi**
+Copyright (C) 2010 **Bruno Vecchi**
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
