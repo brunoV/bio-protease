@@ -28,11 +28,11 @@ Set the enzyme's specificity. Required. Could be either of:
 There are currently definitions for 36 enzymes/reagents. See
 L<Specificities>.
 
-=item * an array reference of regular expressions:
+=item * a regular expression:
 
-    my $motif = ['MN[ED]K[^P].{3}'],
+    my $motif = qr/MN[ED]K[^P].{3}/,
 
-    my $enzyme = Bio::Protease->new(specificity => $motif);
+    my $enzyme = Bio::Protease->new( specificity => $motif );
 
 The motif should always describe an 8-character long peptide. When a an
 octapeptide matches the regex, its 4th peptidic bond (ie, between the
@@ -48,9 +48,13 @@ For example, the peptide AMQRNLAW is recognized as follows:
                       cleavage site
 
 Some specificity rules can only be described with more than one regular
-expression (See the case for trypsin, for example). To account for those
-cases, the array reference could contain an arbitrary number of regexes,
-all of which should match the given octapeptide.
+expression (see the case for trypsin, for example). To account for those
+cases, you can also pass an array reference of regular expressions; all
+of which should match the given octapeptide:
+
+    my $rule = [$rule1, $rule2, $rule3];
+
+    my $enzyme = Bio::Protease->new( specificity => $rule );
 
 In the case your particular specificity rule requires an "or" clause,
 you can use the "|" separator in a single regex.
