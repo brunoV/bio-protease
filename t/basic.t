@@ -16,12 +16,19 @@ dies_ok { $enzyme = Bio::Protease->new() };
 dies_ok { $enzyme = Bio::Protease->new(specificity => 'ooo') };
 
 my $pattern = ['AGGAL[^P]'];
+my $regexp = qr/AGGAL[^P]/;
 
-lives_ok { $enzyme = Bio::Protease->new(specificity => $pattern) };
+test_custom($_) for ($pattern, $regexp);
 
-is $enzyme->specificity, 'custom';
+sub test_custom {
 
-ok  $enzyme->is_substrate( 'AGGALH' );
-ok !$enzyme->is_substrate( 'AGGALP' );
+    lives_ok { $enzyme = Bio::Protease->new(specificity => $pattern) };
+
+    is $enzyme->specificity, 'custom';
+
+    ok  $enzyme->is_substrate( 'AGGALH' );
+    ok !$enzyme->is_substrate( 'AGGALP' );
+}
+
 
 done_testing();

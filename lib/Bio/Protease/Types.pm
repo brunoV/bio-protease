@@ -2,7 +2,7 @@ package Bio::Protease::Types;
 
 # ABSTRACT: Specific types for Bio::Protease
 
-use MooseX::Types::Moose qw(Str ArrayRef);
+use MooseX::Types::Moose qw(Str ArrayRef RegexpRef Any);
 use MooseX::Types -declare => [qw(ProteaseName ProteaseRegex)];
 use namespace::autoclean;
 use Carp qw(croak);
@@ -11,10 +11,12 @@ subtype ProteaseName, as Str;
 
 subtype ProteaseRegex, as ArrayRef;
 
-coerce ProteaseRegex, from Str, via { _str_to_prot_regex($_) };
+coerce ProteaseRegex,
+    from Str,       via { _str_to_prot_regex($_) },
+    from RegexpRef, via { [ $_ ] };
 
 coerce ProteaseName,
-    from ArrayRef, via { 'custom' };
+    from Any, via { 'custom' };
 
 sub _str_to_prot_regex {
     my $specificity = shift;
