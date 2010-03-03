@@ -2,6 +2,8 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+1.100620  2010-03-03 12:11:29 America/Argentina/Buenos_Aires
+
     - Added specificity: alcalase
     - Fix bug were passing a regexp to specificity wouldn't work
     - Methods now die when given no/senseless arguments
