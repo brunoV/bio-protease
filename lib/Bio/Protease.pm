@@ -96,6 +96,8 @@ As a rule, all specificity names are lower case. Currently, they include:
 
 =over 2
 
+=item * alcalase
+
 =item * arg-cproteinase
 
 =item * asp-n_endopeptidase
