@@ -182,6 +182,7 @@ class_has Specificities => (
 sub _build_Specificities {
 
     my %specificity_of = (
+        'alcalase'                   => [ '.{3}[MYFLIVW].{4}'],
         'arg-c_proteinase'           => [ '.{3}R.{4}' ],
         'asp-n_endopeptidase'        => [ '.{4}D.{3}' ],
         'asp-n_endopeptidase_glu'    => [ '.{4}[DE].{3}' ],
