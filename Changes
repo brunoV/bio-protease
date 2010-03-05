@@ -2,6 +2,8 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+1.100640  2010-03-05 02:13:12 America/Argentina/Buenos_Aires
+
      - tidy up test file specificities.yaml due to some failing tests on darwin
      - Several minor doc fixes
 
