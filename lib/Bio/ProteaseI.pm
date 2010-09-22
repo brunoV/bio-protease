@@ -32,12 +32,7 @@ The consuming class just has to implement a C<_cuts> method.
 
 use Moose::Role;
 use Carp 'croak';
-use Memoize qw(memoize flush_cache);
 use namespace::autoclean;
-
-memoize ('cleavage_sites');
-memoize ('is_substrate');
-memoize ('digest');
 
 requires '_cuts';
 
@@ -196,12 +191,6 @@ sub cleavage_sites {
         ++$i;
     }
     return @sites;
-}
-
-sub DEMOLISH {
-    flush_cache('digest');
-    flush_cache('cleavage_sites');
-    flush_cache('is_substrate');
 }
 
 1;
