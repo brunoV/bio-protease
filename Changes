@@ -2,6 +2,8 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+1.102650  2010-09-22 19:59:59 America/Argentina/Buenos_Aires
+
      - Remove memoization via Memoize, was failing tests with new versions of
        Moose.
 
