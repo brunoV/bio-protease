@@ -2,6 +2,9 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+     - Remove memoization via Memoize, was failing tests with new versions of
+       Moose.
+
 1.100640  2010-03-05 02:13:12 America/Argentina/Buenos_Aires
 
      - tidy up test file specificities.yaml due to some failing tests on darwin
@@ -46,6 +49,3 @@ Revision history for {{$dist->name}}
     - Documentation improvements.
     - Substitute "use ok" by "use_ok()" in test suite due to test
       failures on Solaris.
-
-
-
