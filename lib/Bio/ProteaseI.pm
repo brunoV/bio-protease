@@ -33,11 +33,8 @@ The consuming class just has to implement a C<_cuts> method.
 use Moose::Role;
 use Carp 'croak';
 use Memoize qw(memoize flush_cache);
+use Sub::Name qw(subname);
 use namespace::autoclean;
-
-memoize ('cleavage_sites');
-memoize ('is_substrate');
-memoize ('digest');
 
 requires '_cuts';
 
@@ -90,6 +87,15 @@ C<cut> for that).
 
 =cut
 
+# Note: Memoization doesn't work for role methods, since memoize changes the
+# method name, and when the role is composed, it ignores subs that don't
+# belong to its package. The workaround involves renaming the sub that
+# returns memoize to its original package. See
+# http://www.nntp.perl.org/group/perl.moose/2009/05/msg795.html for a
+# discussion on the Moose mailing list
+
+*digest = subname 'Bio::ProteaseI::digest' => memoize('digest');
+
 sub digest {
     my ( $self, $substrate ) = @_;
 
@@ -125,6 +131,8 @@ tasks where the only information required is whether a polypeptide is a
 substrate of a particular enzyme or not 
 
 =cut
+
+*is_substrate = subname 'Bio::ProteaseI::is_substrate' => memoize('is_substrate');
 
 sub is_substrate {
     my ($self, $substrate) = @_;
@@ -179,6 +187,8 @@ as an argument:
     my @sites = $enzyme->cleavage_sites($peptide);
 
 =cut
+
+*cleavage_sites = subname( 'Bio::ProteaseI::cleavage_sites' => memoize ('cleavage_sites') );
 
 sub cleavage_sites {
     my ( $self, $substrate ) = @_;
