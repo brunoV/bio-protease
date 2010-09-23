@@ -2,6 +2,10 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+      - Use workaround in
+      http://www.nntp.perl.org/group/perl.moose/2009/05/msg795.html to solve
+      the memoization of role methods. Now there's caching again.
+
 1.102650  2010-09-22 19:59:59 America/Argentina/Buenos_Aires
 
      - Remove memoization via Memoize, was failing tests with new versions of
@@ -51,3 +55,4 @@ Revision history for {{$dist->name}}
     - Documentation improvements.
     - Substitute "use ok" by "use_ok()" in test suite due to test
       failures on Solaris.
+
