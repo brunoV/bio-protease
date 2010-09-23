@@ -9,7 +9,7 @@ package Bio::ProteaseI;
     with 'Bio::ProteaseI';
 
     sub _cuts {
-        my ($self, $substrate) = @_;
+        my ($self, $peptide) = @_;
 
         # some code that decides
         # if $peptide should be cut or not
