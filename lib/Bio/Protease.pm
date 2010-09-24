@@ -2,11 +2,17 @@ package Bio::Protease;
 use Moose;
 use MooseX::ClassAttribute;
 use MooseX::Types::Moose qw(HashRef);
-use namespace::autoclean;
 use Bio::Protease::Types qw(ProteaseRegex ProteaseName);
+use Memoize qw(memoize flush_cache);
 with 'Bio::ProteaseI';
 
+use namespace::autoclean;
+
 # ABSTRACT: Digest your protein substrates with customizable specificity
+
+memoize('digest');
+memoize('cleavage_sites');
+memoize('is_substrate');
 
 has _regex => (
     is  => 'ro',
@@ -230,6 +236,12 @@ sub _build_Specificities {
     );
 
     return \%specificity_of;
+}
+
+sub DEMOLISH {
+    flush_cache('digest');
+    flush_cache('is_substrate');
+    flush_cache('cleavage_sites');
 }
 
 __PACKAGE__->meta->make_immutable;
