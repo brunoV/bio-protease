@@ -1,18 +1,13 @@
 package Bio::Protease;
 use Moose;
 use MooseX::ClassAttribute;
-use MooseX::Types::Moose qw(HashRef);
+use MooseX::Types::Moose qw(Bool HashRef);
 use Bio::Protease::Types qw(ProteaseRegex ProteaseName);
-use Memoize qw(memoize flush_cache);
 with 'Bio::ProteaseI';
 
 use namespace::autoclean;
 
 # ABSTRACT: Digest your protein substrates with customizable specificity
-
-memoize('digest');
-memoize('cleavage_sites');
-memoize('is_substrate');
 
 has _regex => (
     is  => 'ro',
@@ -238,10 +233,63 @@ sub _build_Specificities {
     return \%specificity_of;
 }
 
-sub DEMOLISH {
-    flush_cache('digest');
-    flush_cache('is_substrate');
-    flush_cache('cleavage_sites');
+=attr use_cache
+
+Turn caching on, trading memory for speed. Defaults to 0 (no caching).
+Useful when any method is being called several times with the same
+argument.
+
+    my $p = Bio::Protease->new( specificity => 'trypsin', use_cache => 0 );
+    my $c = Bio::Protease->new( specificity => 'trypsin', use_cache => 1 );
+
+    my $substrate = 'MAAEELRKVIKPR' x 10;
+
+    $p->digest( $substrate ) for (1..1000); # time: 5.11s
+    $c->digest( $substrate ) for (1..1000); # time: 0.12s
+
+=cut
+
+has use_cache => ( is => 'ro', isa => Bool, default => 0 );
+
+=attr cache
+
+The cache object, which has to do the L<Cache::Ref::Role::API> role.
+Uses L<Cache::Ref::LRU> by default with a cache size of 5000, but you
+can set this to your liking at construction time:
+
+    my $p = Bio::Protease->new(
+        use_cache   => 1,
+        cache       => Cache::Ref::Random->new( size => 50 ),
+        specificity => 'trypsin'
+    );
+
+=cut
+
+has cache => (
+    is   => 'ro',
+    lazy => 1,
+    does => 'Cache::Ref::Role::API',
+    default =>
+      sub { require Cache::Ref::LRU; Cache::Ref::LRU->new( size => 5000 ) },
+);
+
+foreach my $method (qw(digest is_substrate cleavage_sites)) {
+    around $method => sub {
+        my ($orig, $self, $substrate) = @_;
+
+        return $self->$orig($substrate) if ( !$self->use_cache or !$substrate );
+
+        my $computed = $self->cache->get("$method-$substrate");
+
+        if ($computed) {
+            return @$computed;
+        }
+        else {
+            my @result = $self->$orig($substrate);
+            $self->cache->set( "$method-$substrate" => \@result );
+            return @result;
+        }
+    };
 }
 
 __PACKAGE__->meta->make_immutable;
