@@ -208,6 +208,12 @@ sub cleavage_sites {
     return @sites;
 }
 
+sub DEMOLISH {
+    flush_cache('digest');
+    flush_cache('is_substrate');
+    flush_cache('cleavage_sites');
+}
+
 1;
 
 =head1 How to implement your own Protease class.
