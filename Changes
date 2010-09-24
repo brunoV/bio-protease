@@ -2,6 +2,8 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+1.102670  2010-09-24 12:19:06 America/Argentina/Buenos_Aires
+
       - Better code example in ProteaseI.pm
       - Add cache flushing at DESTROY time. Fixes test failures on perl-5.12
 
