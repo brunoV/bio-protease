@@ -266,9 +266,10 @@ can set this to your liking at construction time:
 =cut
 
 has cache => (
-    is   => 'ro',
-    lazy => 1,
-    does => 'Cache::Ref::Role::API',
+    is        => 'ro',
+    lazy      => 1,
+    does      => 'Cache::Ref::Role::API',
+    predicate => '_has_cache',
     default =>
       sub { require Cache::Ref::LRU; Cache::Ref::LRU->new( size => 5000 ) },
 );
