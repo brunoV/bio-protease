@@ -1,7 +1,6 @@
 package Bio::Protease;
 use Moose;
 use MooseX::ClassAttribute;
-use MooseX::Types::Moose 'HashRef';
 use Bio::Protease::Types qw(ProteaseRegex ProteaseName);
 with qw(
     Bio::ProteaseI
@@ -169,8 +168,7 @@ file.
 =cut
 
 class_has Specificities => (
-    is      => 'ro',
-    isa     => HashRef,
+    is         => 'ro',
     lazy_build => 1,
 );
 
