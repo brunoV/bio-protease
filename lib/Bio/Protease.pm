@@ -1,9 +1,9 @@
 package Bio::Protease;
 use Moose;
 use MooseX::ClassAttribute;
-use MooseX::Types::Moose qw(Bool HashRef);
+use MooseX::Types::Moose 'HashRef';
 use Bio::Protease::Types qw(ProteaseRegex ProteaseName);
-with 'Bio::ProteaseI';
+with qw(Bio::ProteaseI Bio::Protease::Role::WithCache);
 
 use namespace::autoclean;
 
@@ -247,10 +247,6 @@ argument.
     $p->digest( $substrate ) for (1..1000); # time: 5.11s
     $c->digest( $substrate ) for (1..1000); # time: 0.12s
 
-=cut
-
-has use_cache => ( is => 'ro', isa => Bool, default => 0 );
-
 =attr cache
 
 The cache object, which has to do the L<Cache::Ref::Role::API> role.
@@ -264,35 +260,6 @@ can set this to your liking at construction time:
     );
 
 =cut
-
-has cache => (
-    is        => 'ro',
-    lazy      => 1,
-    does      => 'Cache::Ref::Role::API',
-    predicate => '_has_cache',
-    default =>
-      sub { require Cache::Ref::LRU; Cache::Ref::LRU->new( size => 5000 ) },
-);
-
-foreach my $method (qw(digest is_substrate cleavage_sites)) {
-    around $method => sub {
-        my ($orig, $self, $substrate) = @_;
-
-        return $self->$orig($substrate) if ( !$self->use_cache or !$substrate );
-
-        my $computed = $self->cache->get("$method-$substrate");
-
-        if ($computed) {
-            return @$computed;
-        }
-        else {
-            my @result = $self->$orig($substrate);
-            $self->cache->set( "$method-$substrate" => \@result );
-            return @result;
-        }
-    };
-}
-
 __PACKAGE__->meta->make_immutable;
 
 =head1 SYNOPSIS
