@@ -3,18 +3,17 @@ use Moose;
 use MooseX::ClassAttribute;
 use MooseX::Types::Moose 'HashRef';
 use Bio::Protease::Types qw(ProteaseRegex ProteaseName);
-with qw(Bio::ProteaseI Bio::Protease::Role::WithCache);
+with qw(
+    Bio::ProteaseI
+    Bio::Protease::Role::Specificity::Regex
+    Bio::Protease::Role::WithCache
+);
 
 use namespace::autoclean;
 
 # ABSTRACT: Digest your protein substrates with customizable specificity
 
-has _regex => (
-    is  => 'ro',
-    isa => ProteaseRegex,
-    init_arg => 'specificity',
-    coerce => 1,
-);
+has '+regex' => ( init_arg => 'specificity' );
 
 =attr specificity
 
@@ -70,17 +69,6 @@ has specificity => (
     required => 1,
     coerce   => 1
 );
-
-sub _cuts {
-    my ($self, $peptide) = @_;
-
-    if ( grep { $peptide !~ /$_/ } @{$self->_regex} ) {
-        return;
-    }
-
-    return 'yes, it cuts';
-
-};
 
 =attr Specificities
 
