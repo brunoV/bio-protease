@@ -1,18 +1,123 @@
 package Bio::Protease;
+
+# ABSTRACT: Digest your protein substrates with customizable specificity
+
 use Moose;
 use MooseX::ClassAttribute;
 use Bio::Protease::Types qw(ProteaseRegex ProteaseName);
+use namespace::autoclean;
+
 with qw(
     Bio::ProteaseI
     Bio::Protease::Role::Specificity::Regex
     Bio::Protease::Role::WithCache
 );
 
-use namespace::autoclean;
-
-# ABSTRACT: Digest your protein substrates with customizable specificity
-
 has '+regex' => ( init_arg => 'specificity' );
+
+has specificity => (
+    is  => 'ro',
+    isa => ProteaseName,
+    required => 1,
+    coerce   => 1
+);
+
+class_has Specificities => (
+    is         => 'ro',
+    lazy_build => 1,
+);
+
+sub _build_Specificities {
+
+    my %specificity_of = (
+        'alcalase'                   => [ '.{3}[MYFLIVW].{4}'],
+        'arg-c_proteinase'           => [ '.{3}R.{4}' ],
+        'asp-n_endopeptidase'        => [ '.{4}D.{3}' ],
+        'asp-n_endopeptidase_glu'    => [ '.{4}[DE].{3}' ],
+        'bnps_skatole'               => [ '.{3}W.{4}' ],
+        'caspase_1'                  => [ '[FWYL].[HAT]D[^PEDQKR].{3}' ],
+        'caspase_2'                  => [ 'DVAD[^PEDQKR].{3}' ],
+        'caspase_3'                  => [ 'DMQD[^PEDQKR].{3}' ],
+        'caspase_4'                  => [ 'LEVD[^PEDQKR].{3}' ],
+        'caspase_5'                  => [ '[LW]EHD.{4}' ],
+        'caspase_6'                  => [ 'VE[HI]D[^PEDQKR].{3}' ],
+        'caspase_7'                  => [ 'DEVD[^PEDQKR].{3}' ],
+        'caspase_8'                  => [ '[IL]ETD[^PEDQKR].{3}' ],
+        'caspase_9'                  => [ 'LEHD.{4}' ],
+        'caspase_10'                 => [ 'IEAD.{4}' ],
+        'chymotrypsin'               => [ '.{3}[FY][^P].{3}|.{3}W[^MP].{3}' ],
+        'chymotrypsin_low'           => [ '.{3}[FLY][^P].{3}|.{3}W[^MP].{3}|.{3}M[^PY].{3}|.{3}H[^DMPW].{3}' ],
+        'clostripain'                => [ '.{3}R.{4}' ],
+        'cnbr'                       => [ '.{3}M.{4}' ],
+        'enterokinase'               => [ '[DN][DN][DN]K.{4}' ],
+        'factor_xa'                  => [ '[AFGILTVM][DE]GR.{4}' ],
+        'formic_acid'                => [ '.{3}D.{4}' ],
+        'glutamyl_endopeptidase'     => [ '.{3}E.{4}' ],
+        'granzymeb'                  => [ 'IEPD.{4}' ],
+        'hydroxylamine'              => [ '.{3}NG.{3}' ],
+        'hcl'                        => [ '.{8}' ],
+        'iodosobenzoic_acid'         => [ '.{3}W.{4}' ],
+        'lysc'                       => [ '.{3}K.{4}' ],
+        'lysn'                       => [ '.{4}K.{3}' ],
+        'ntcb'                       => [ '.{4}C.{3}' ],
+        'pepsin_ph1.3'               => [ '.[^HKR][^P][^R][FLWY][^P].{2}|.[^HKR][^P][FLWY].[^P].{2}' ],
+        'pepsin'                     => [ '.[^HKR][^P][^R][FL][^P].{2}|.[^HKR][^P][FL].[^P].{2}' ],
+        'proline_endopeptidase'      => [ '.{2}[HKR]P[^P].{3}' ],
+        'proteinase_k'               => [ '.{3}[AFILTVWY].{4}' ],
+        'staphylococcal_peptidase_i' => [ '.{2}[^E]E.{4}' ],
+        'thermolysin'                => [ '.{3}[^XDE][AFILMV][^P].{2}' ],
+        'thrombin'                   => [ '.{2}GRG.{3}|[AFGILTVM][AFGILTVWA]PR[^DE][^DE].{2}' ],
+        'trypsin'                    => [ '.{2}(?!CKD).{6}', '.{2}(?!DKD).{6}', '.{2}(?!CKH).{6}', '.{2}(?!CKY).{6}', '.{2}(?!RRH).{6}', '.{2}(?!RRR).{6}', '.{2}(?!CRK).{6}',
+                                        '.{3}[KR][^P].{3}|.{2}WKP.{3}|.{2}MRP.{3}' ]
+    );
+
+    return \%specificity_of;
+}
+
+__PACKAGE__->meta->make_immutable;
+
+=head1 SYNOPSIS
+
+    use Bio::Protease;
+    my $protease = Bio::Protease->new(specificity => 'trypsin');
+
+    my $protein = 'MRAERVIKP';
+
+    # Perform a full digestion
+    my @products = $protease->digest($protein);
+
+    # products: ( 'MR', 'AER', 'VIKP' )
+
+    # Get all the siscile bonds.
+    my @sites = $protease->cleavage_sites($protein);
+
+    # sites: ( 2, 5 )
+
+    # Try to cut at a specific position.
+
+    @products = $protease->cut($protein, 2);
+
+    # products: ( 'MR', 'AERVIKP' )
+
+=cut
+
+=head1 DESCRIPTION
+
+This module models the hydrolitic behaviour of a proteolytic enzyme.
+Its main purpose is to predict the outcome of hydrolitic cleavage of a
+peptidic substrate.
+
+The enzyme specificity is currently modeled for 37 enzymes/reagents.
+This models are somewhat simplistic as they are largely regex-based, and
+do not take into account subtleties such as kinetic/temperature effects,
+accessible solvent area, secondary or tertiary structure elements.
+However, the module is flexible enough to allow the inclusion of any of
+these effects by consuming the module's interface, L<Bio::ProteaseI>.
+Alternatively, if your desired specificity can be correctly described by
+a regular expression, you can pass it to the specificity attribute at
+construction time. See L<specificity> below.
+
+=cut
 
 =attr specificity
 
@@ -61,13 +166,6 @@ you can use the "|" separator in a single regex.
 =back
 
 =cut
-
-has specificity => (
-    is  => 'ro',
-    isa => ProteaseName,
-    required => 1,
-    coerce   => 1
-);
 
 =attr Specificities
 
@@ -167,58 +265,6 @@ file.
 
 =cut
 
-class_has Specificities => (
-    is         => 'ro',
-    lazy_build => 1,
-);
-
-sub _build_Specificities {
-
-    my %specificity_of = (
-        'alcalase'                   => [ '.{3}[MYFLIVW].{4}'],
-        'arg-c_proteinase'           => [ '.{3}R.{4}' ],
-        'asp-n_endopeptidase'        => [ '.{4}D.{3}' ],
-        'asp-n_endopeptidase_glu'    => [ '.{4}[DE].{3}' ],
-        'bnps_skatole'               => [ '.{3}W.{4}' ],
-        'caspase_1'                  => [ '[FWYL].[HAT]D[^PEDQKR].{3}' ],
-        'caspase_2'                  => [ 'DVAD[^PEDQKR].{3}' ],
-        'caspase_3'                  => [ 'DMQD[^PEDQKR].{3}' ],
-        'caspase_4'                  => [ 'LEVD[^PEDQKR].{3}' ],
-        'caspase_5'                  => [ '[LW]EHD.{4}' ],
-        'caspase_6'                  => [ 'VE[HI]D[^PEDQKR].{3}' ],
-        'caspase_7'                  => [ 'DEVD[^PEDQKR].{3}' ],
-        'caspase_8'                  => [ '[IL]ETD[^PEDQKR].{3}' ],
-        'caspase_9'                  => [ 'LEHD.{4}' ],
-        'caspase_10'                 => [ 'IEAD.{4}' ],
-        'chymotrypsin'               => [ '.{3}[FY][^P].{3}|.{3}W[^MP].{3}' ],
-        'chymotrypsin_low'           => [ '.{3}[FLY][^P].{3}|.{3}W[^MP].{3}|.{3}M[^PY].{3}|.{3}H[^DMPW].{3}' ],
-        'clostripain'                => [ '.{3}R.{4}' ],
-        'cnbr'                       => [ '.{3}M.{4}' ],
-        'enterokinase'               => [ '[DN][DN][DN]K.{4}' ],
-        'factor_xa'                  => [ '[AFGILTVM][DE]GR.{4}' ],
-        'formic_acid'                => [ '.{3}D.{4}' ],
-        'glutamyl_endopeptidase'     => [ '.{3}E.{4}' ],
-        'granzymeb'                  => [ 'IEPD.{4}' ],
-        'hydroxylamine'              => [ '.{3}NG.{3}' ],
-        'hcl'                        => [ '.{8}' ],
-        'iodosobenzoic_acid'         => [ '.{3}W.{4}' ],
-        'lysc'                       => [ '.{3}K.{4}' ],
-        'lysn'                       => [ '.{4}K.{3}' ],
-        'ntcb'                       => [ '.{4}C.{3}' ],
-        'pepsin_ph1.3'               => [ '.[^HKR][^P][^R][FLWY][^P].{2}|.[^HKR][^P][FLWY].[^P].{2}' ],
-        'pepsin'                     => [ '.[^HKR][^P][^R][FL][^P].{2}|.[^HKR][^P][FL].[^P].{2}' ],
-        'proline_endopeptidase'      => [ '.{2}[HKR]P[^P].{3}' ],
-        'proteinase_k'               => [ '.{3}[AFILTVWY].{4}' ],
-        'staphylococcal_peptidase_i' => [ '.{2}[^E]E.{4}' ],
-        'thermolysin'                => [ '.{3}[^XDE][AFILMV][^P].{2}' ],
-        'thrombin'                   => [ '.{2}GRG.{3}|[AFGILTVM][AFGILTVWA]PR[^DE][^DE].{2}' ],
-        'trypsin'                    => [ '.{2}(?!CKD).{6}', '.{2}(?!DKD).{6}', '.{2}(?!CKH).{6}', '.{2}(?!CKY).{6}', '.{2}(?!RRH).{6}', '.{2}(?!RRR).{6}', '.{2}(?!CRK).{6}',
-                                        '.{3}[KR][^P].{3}|.{2}WKP.{3}|.{2}MRP.{3}' ]
-    );
-
-    return \%specificity_of;
-}
-
 =attr use_cache
 
 Turn caching on, trading memory for speed. Defaults to 0 (no caching).
@@ -244,50 +290,6 @@ can set this to your liking at construction time:
         cache       => Cache::Ref::Random->new( size => 50 ),
         specificity => 'trypsin'
     );
-
-=cut
-__PACKAGE__->meta->make_immutable;
-
-=head1 SYNOPSIS
-
-    use Bio::Protease;
-    my $protease = Bio::Protease->new(specificity => 'trypsin');
-
-    my $protein = 'MRAERVIKP';
-
-    # Perform a full digestion
-    my @products = $protease->digest($protein);
-
-    # products: ( 'MR', 'AER', 'VIKP' )
-
-    # Get all the siscile bonds.
-    my @sites = $protease->cleavage_sites($protein);
-
-    # sites: ( 2, 5 )
-
-    # Try to cut at a specific position.
-
-    @products = $protease->cut($protein, 2);
-
-    # products: ( 'MR', 'AERVIKP' )
-
-=cut
-
-=head1 DESCRIPTION
-
-This module models the hydrolitic behaviour of a proteolytic enzyme.
-Its main purpose is to predict the outcome of hydrolitic cleavage of a
-peptidic substrate.
-
-The enzyme specificity is currently modeled for 37 enzymes/reagents.
-This models are somewhat simplistic as they are largely regex-based, and
-do not take into account subtleties such as kinetic/temperature effects,
-accessible solvent area, secondary or tertiary structure elements.
-However, the module is flexible enough to allow the inclusion of any of
-these effects by consuming the module's interface, L<Bio::ProteaseI>.
-Alternatively, if your desired specificity can be correctly described by
-a regular expression, you can pass it to the specificity attribute at
-construction time. See L<specificity> below.
 
 =cut
 
@@ -327,7 +329,6 @@ tasks where the only information required is whether a polypeptide is a
 substrate of a particular enzyme or not 
 
 =cut
-
 
 =head1 SEE ALSO
 

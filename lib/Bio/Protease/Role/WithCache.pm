@@ -6,37 +6,7 @@ use Moose::Role;
 use MooseX::Types::Moose 'Bool';
 use namespace::autoclean;
 
-=attr use_cache
-
-Turn caching on, trading memory for speed. Defaults to 0 (no caching).
-Useful when any method is being called several times with the same
-argument.
-
-    my $p = Bio::Protease->new( specificity => 'trypsin', use_cache => 0 );
-    my $c = Bio::Protease->new( specificity => 'trypsin', use_cache => 1 );
-
-    my $substrate = 'MAAEELRKVIKPR' x 10;
-
-    $p->digest( $substrate ) for (1..1000); # time: 5.11s
-    $c->digest( $substrate ) for (1..1000); # time: 0.12s
-
-=cut
-
 has use_cache => ( is => 'ro', isa => Bool, default => 0 );
-
-=attr cache
-
-The cache object, which has to do the L<Cache::Ref::Role::API> role.
-Uses L<Cache::Ref::LRU> by default with a cache size of 5000, but you
-can set this to your liking at construction time:
-
-    my $p = Bio::Protease->new(
-        use_cache   => 1,
-        cache       => Cache::Ref::Random->new( size => 50 ),
-        specificity => 'trypsin'
-    );
-
-=cut
 
 has cache => (
     is        => 'ro',
@@ -78,6 +48,32 @@ foreach my $method (qw(digest is_substrate cleavage_sites)) {
     # through the 'has_cache' and 'cache' attributes
 
     1;
+
+=attr use_cache
+
+Turn caching on, trading memory for speed. Defaults to 0 (no caching).
+Useful when any method is being called several times with the same
+argument.
+
+    my $p = Bio::Protease->new( specificity => 'trypsin', use_cache => 0 );
+    my $c = Bio::Protease->new( specificity => 'trypsin', use_cache => 1 );
+
+    my $substrate = 'MAAEELRKVIKPR' x 10;
+
+    $p->digest( $substrate ) for (1..1000); # time: 5.11s
+    $c->digest( $substrate ) for (1..1000); # time: 0.12s
+
+=attr cache
+
+The cache object, which has to do the L<Cache::Ref::Role::API> role.
+Uses L<Cache::Ref::LRU> by default with a cache size of 5000, but you
+can set this to your liking at construction time:
+
+    my $p = Bio::Protease->new(
+        use_cache   => 1,
+        cache       => Cache::Ref::Random->new( size => 50 ),
+        specificity => 'trypsin'
+    );
 
 =cut
 

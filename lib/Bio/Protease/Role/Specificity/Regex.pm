@@ -5,16 +5,6 @@ package Bio::Protease::Role::Specificity::Regex;
 use Moose::Role;
 use Bio::Protease::Types 'ProteaseRegex';
 
-=attr regex
-
-A C<ProteaseRegex>, which is basically an array reference of regular
-expressions that describe the protease specificity. It can coerce from a
-single regular expression into a single-element array of regexps.  Any
-of the regexes in the array should match a given substrate for it to be
-cleavable.
-
-=cut
-
 has regex => (
     is  => 'ro',
     isa => ProteaseRegex,
@@ -57,6 +47,14 @@ the fourth and fifth residues.
 For instance, if the specificity could be described as "cuts after
 lysine or arginine", the appropriate regular expression would be
 C<qr/.{3}[KR].{4}/>.
+
+=attr regex
+
+A C<ProteaseRegex>, which is basically an array reference of regular
+expressions that describe the protease specificity. It can coerce from a
+single regular expression into a single-element array of regexps.  Any
+of the regexes in the array should match a given substrate for it to be
+cleavable.
 
 =cut
 

@@ -2,49 +2,11 @@ package Bio::ProteaseI;
 
 # ABSTRACT: A role to build your customized Protease
 
-=head1 SYNOPSIS
-
-    package My::Protease;
-    use Moose;
-    with 'Bio::ProteaseI';
-
-    sub _cuts {
-        my ($self, $peptide) = @_;
-
-        # some code that decides
-        # if $peptide should be cut or not
-
-        if ( $peptide_should_be_cut ) { return 1 }
-        else                          { return   }
-    };
-
-=head1 DESCRIPTION
-
-This module describes the interface for L<Bio::Protease>. You only need
-to use this if you want to build your custom specificity protease and
-regular expressions won't do; otherwise look at L<Bio::Protease>
-instead.
-
-All of the methods provided in L<Bio::Protease> are defined here.
-The consuming class just has to implement a C<_cuts> method.
-
-=cut
-
 use Moose::Role;
 use Carp 'croak';
 use namespace::autoclean;
 
 requires '_cuts';
-
-=method cut
-
-Attempt to cleave C<$peptide> at the C-terminal end of the C<$i>-th
-residue (ie, at the right). If the bond is indeed cleavable (determined
-by the enzyme's specificity), then a list with the two products of the
-hydrolysis will be returned. Otherwise, returns false.
-
-    my @products = $enzyme->cut($peptide, $i);
-=cut
 
 sub cut {
     my ( $self, $substrate, $pos ) = @_;
@@ -75,23 +37,6 @@ sub cut {
     else { return }
 }
 
-=method digest
-
-Performs a complete digestion of the peptide argument, returning a list
-with possible products. It does not do partial digests (see method
-C<cut> for that).
-
-    my @products = $enzyme->digest($protein);
-
-=cut
-
-# Note: Memoization doesn't work for role methods, since memoize changes the
-# method name, and when the role is composed, it ignores subs that don't
-# belong to its package. The workaround involves renaming the sub that
-# returns memoize to its original package. See
-# http://www.nntp.perl.org/group/perl.moose/2009/05/msg795.html for a
-# discussion on the Moose mailing list
-
 sub digest {
     my ( $self, $substrate ) = @_;
 
@@ -116,17 +61,6 @@ sub digest {
 
     return @products;
 }
-
-=method is_substrate
-
-Returns true or false whether the peptide argument is a substrate or
-not. Esentially, it's equivalent to calling C<cleavage_sites> in boolean
-context, but with the difference that this method short-circuits when it
-finds its first cleavable site. Thus, it's useful for CPU-intensive
-tasks where the only information required is whether a polypeptide is a
-substrate of a particular enzyme or not 
-
-=cut
 
 sub is_substrate {
     my ($self, $substrate) = @_;
@@ -170,18 +104,6 @@ sub _uncap { s/X//g for @_ }
 
 sub _looks_like_string { $_[0] ~~ /[a-z]+/i }
 
-
-=method cleavage_sites
-
-Returns a list with siscile bonds (bonds susceptible to be cleaved as
-determined by the enzyme's specificity). Bonds are numbered starting
-from 1, from N to C-terminal. Takes a string with the protein sequence
-as an argument:
-
-    my @sites = $enzyme->cleavage_sites($peptide);
-
-=cut
-
 sub cleavage_sites {
     my ( $self, $substrate ) = @_;
 
@@ -201,6 +123,34 @@ sub cleavage_sites {
 }
 
 1;
+
+=head1 SYNOPSIS
+
+    package My::Protease;
+    use Moose;
+    with 'Bio::ProteaseI';
+
+    sub _cuts {
+        my ($self, $peptide) = @_;
+
+        # some code that decides
+        # if $peptide should be cut or not
+
+        if ( $peptide_should_be_cut ) { return 1 }
+        else                          { return   }
+    };
+
+=head1 DESCRIPTION
+
+This module describes the interface for L<Bio::Protease>. You only need
+to use this if you want to build your custom specificity protease and
+regular expressions won't do; otherwise look at L<Bio::Protease>
+instead.
+
+All of the methods provided in L<Bio::Protease> are defined here.
+The consuming class just has to implement a C<_cuts> method.
+
+=cut
 
 =head1 How to implement your own Protease class.
 
@@ -277,6 +227,48 @@ Of course, this specificity model is too simple to deserve a new class,
 as it could be perfectly defined by a regex and passed to the
 C<specificity> attribute of L<Bio::Protease>. It's only used here as an
 example.
+
+=cut
+
+=method cut
+
+Attempt to cleave C<$peptide> at the C-terminal end of the C<$i>-th
+residue (ie, at the right). If the bond is indeed cleavable (determined
+by the enzyme's specificity), then a list with the two products of the
+hydrolysis will be returned. Otherwise, returns false.
+
+    my @products = $enzyme->cut($peptide, $i);
+=cut
+
+=method digest
+
+Performs a complete digestion of the peptide argument, returning a list
+with possible products. It does not do partial digests (see method
+C<cut> for that).
+
+    my @products = $enzyme->digest($protein);
+
+=cut
+
+=method is_substrate
+
+Returns true or false whether the peptide argument is a substrate or
+not. Esentially, it's equivalent to calling C<cleavage_sites> in boolean
+context, but with the difference that this method short-circuits when it
+finds its first cleavable site. Thus, it's useful for CPU-intensive
+tasks where the only information required is whether a polypeptide is a
+substrate of a particular enzyme or not 
+
+=cut
+
+=method cleavage_sites
+
+Returns a list with siscile bonds (bonds susceptible to be cleaved as
+determined by the enzyme's specificity). Bonds are numbered starting
+from 1, from N to C-terminal. Takes a string with the protein sequence
+as an argument:
+
+    my @sites = $enzyme->cleavage_sites($peptide);
 
 =cut
 
