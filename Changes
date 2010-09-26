@@ -2,6 +2,9 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+      - Replace misuse of dies_ok for throws_ok in t/proteasei, was throwing
+        fatal exception when user had Test::Builder2.
+
 1.102680  2010-09-25 18:34:03 America/Argentina/Buenos_Aires
 
       - Implement optional, per-instance caching with Cache::Ref. No longer
@@ -69,4 +72,3 @@ Revision history for {{$dist->name}}
     - Documentation improvements.
     - Substitute "use ok" by "use_ok()" in test suite due to test
       failures on Solaris.
-
