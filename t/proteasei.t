@@ -25,22 +25,22 @@ can_ok( $protease, qw(cut is_substrate digest cleavage_sites) );
 my $seq = 'AAAAMAELVIKPYYYYYYY';
 
 ok $protease->cut($seq, 8), 'Cut works';
-dies_ok { $protease->cut            } qr/Incorrect substrate/;
-dies_ok { $protease->cut(42)        } qr/Incorrect substrate/;
-dies_ok { $protease->cut('foo')     } qr/Incorrect position/;
-dies_ok { $protease->cut('foo', 42) } qr/Incorrect position/;
-dies_ok { $protease->cut('foo', -1) } qr/Incorrect position/;
+throws_ok { $protease->cut            } qr/Incorrect substrate/;
+throws_ok { $protease->cut(42)        } qr/Incorrect substrate/;
+throws_ok { $protease->cut('foo')     } qr/Incorrect position/;
+throws_ok { $protease->cut('foo', 42) } qr/Incorrect position/;
+throws_ok { $protease->cut('foo', -1) } qr/Incorrect position/;
 
 ok $protease->is_substrate($seq);
-dies_ok { $protease->is_substrate     } qr/Incorrect substrate/;
-dies_ok { $protease->is_substrate(42) } qr/Incorrect substrate/;
+throws_ok { $protease->is_substrate     } qr/Incorrect substrate/;
+throws_ok { $protease->is_substrate(42) } qr/Incorrect substrate/;
 
 is_deeply [$protease->cleavage_sites($seq)], [8];
-dies_ok { $protease->cleavage_sites     } qr/Incorrect substrate/;
-dies_ok { $protease->cleavage_sites(42) } qr/Incorrect substrate/;
+throws_ok { $protease->cleavage_sites     } qr/Incorrect substrate/;
+throws_ok { $protease->cleavage_sites(42) } qr/Incorrect substrate/;
 
-dies_ok { $protease->digest     } qr/Incorrect substrate/;
-dies_ok { $protease->digest(42) } qr/Incorrect substrate/;
+throws_ok { $protease->digest     } qr/Incorrect substrate/;
+throws_ok { $protease->digest(42) } qr/Incorrect substrate/;
 
 my @products = $protease->digest( 'AAAAMAELVIKPYYYYYYY' );
 
