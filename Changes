@@ -2,6 +2,8 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+1.102690  2010-09-26 10:35:17 America/Argentina/Buenos_Aires
+
       - Replace misuse of dies_ok for throws_ok in t/proteasei, was throwing
         fatal exception when user had Test::Builder2.
 
