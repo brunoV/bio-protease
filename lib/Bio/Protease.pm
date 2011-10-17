@@ -2,7 +2,7 @@ package Bio::Protease;
 
 # ABSTRACT: Digest your protein substrates with customizable specificity
 
-use Moose;
+use Moose 1.23;
 use MooseX::ClassAttribute;
 use Bio::Protease::Types qw(ProteaseRegex ProteaseName);
 use namespace::autoclean;
