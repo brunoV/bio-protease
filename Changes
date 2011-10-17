@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+1.112900  2011-10-16 22:39:00 America/Argentina/Buenos_Aires
       - Require Moose >= 1.23 explicitly
 
 1.102690  2010-09-26 10:35:17 America/Argentina/Buenos_Aires
